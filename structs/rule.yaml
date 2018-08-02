@@ -1,0 +1,18 @@
+name: Rule
+includes:
+  - judgment.h
+members:
+  conditions: std::unordered_set<judgment>
+  conclusion: judgment
+properties:
+  signature:
+    type: const std::unordered_map<token, int>
+    body: {}
+multilookups:
+  lookup_by_conclusion:
+    getter: conclusion
+  lookup_by_signature:
+    getter: signature
+  lookup_by_condition:
+    getter: conditions
+    iterable: true

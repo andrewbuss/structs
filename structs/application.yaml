@@ -1,0 +1,15 @@
+name: Application
+includes:
+  - rule.h
+members:
+  via: rule
+  args: std::vector<judgment>
+  condition_proofs: std::unordered_set<application>
+  result: judgment
+lookups:
+  lookup_by_rule:
+    type: rule
+    getter: via
+  lookup_by_result:
+    type: judgment
+    getter: result

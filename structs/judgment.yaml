@@ -1,0 +1,22 @@
+name: Judgment
+includes:
+  - token.h
+members:
+  cs: std::vector<token>
+properties:
+  type:
+    type: token
+    body: cs[0]
+unique_index: lookup_by_cs
+lookups:
+  lookup_by_cs:
+    type: std::vector<token>
+    getter: cs
+    unique: true
+  lookup_by_type:
+    type: token
+    getter: type()
+  lookup_by_token:
+    type: token
+    getter: cs
+    iterable: true

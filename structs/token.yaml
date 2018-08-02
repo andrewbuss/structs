@@ -1,0 +1,9 @@
+name: Token
+members:
+  s: std::string
+unique_index: lookup_by_s
+lookups:
+  lookup_by_s:
+    getter: s
+    type: std::string
+    unique: true
