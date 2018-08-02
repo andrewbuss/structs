@@ -1,9 +1,8 @@
 {%- set lname = name.lower() %}
 {%- set plural = lname + 's' %}
-{%- set abbr = lname[0] %}
-
+{%- set abbr = lname[0] -%}
 #include <{{ lname }}.h>
-{% for include in includes %}
+{%- for include in includes %}
 #include <{{ include }}>
 {% endfor %}
 

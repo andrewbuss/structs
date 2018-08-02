@@ -1,8 +1,5 @@
-
-
-#include <rule.h>
-
 #include <judgment.h>
+#include <rule.h>
 
 std::vector<Rule> Rule::all_rules{{}};
 

@@ -1,7 +1,4 @@
-
-
 #include <judgment.h>
-
 #include <token.h>
 
 std::vector<Judgment> Judgment::all_judgments{{}};

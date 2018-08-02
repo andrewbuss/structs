@@ -1,7 +1,4 @@
-
-
 #include <application.h>
-
 #include <rule.h>
 
 std::vector<Application> Application::all_applications{{}};

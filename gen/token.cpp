@@ -1,5 +1,3 @@
-
-
 #include <token.h>
 
 std::vector<Token> Token::all_tokens{{}};
