@@ -47,8 +47,8 @@ struct Application {
   static lookup_by_rule_index_type lookup_by_rule_index;
   using lookup_by_rule_index_iterator =
       lookup_by_rule_index_type::const_iterator;
-  static std::pair<lookup_by_rule_index_iterator, lookup_by_rule_index_iterator>
 
+  static std::pair<lookup_by_rule_index_iterator, lookup_by_rule_index_iterator>
   lookup_by_rule(const rule &x) {
     return lookup_by_rule_index.equal_range(x);
   }
@@ -59,9 +59,9 @@ struct Application {
   static lookup_by_result_index_type lookup_by_result_index;
   using lookup_by_result_index_iterator =
       lookup_by_result_index_type::const_iterator;
+
   static std::pair<lookup_by_result_index_iterator,
                    lookup_by_result_index_iterator>
-
   lookup_by_result(const judgment &x) {
     return lookup_by_result_index.equal_range(x);
   }

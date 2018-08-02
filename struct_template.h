@@ -77,8 +77,8 @@ struct {{ name }} {
   using {{ lookup }}_index_type = std::unordered_multimap<{{ lookup_spec.type }}, {{ lname }}>;
   static {{ lookup }}_index_type {{ lookup }}_index;
   using {{ lookup }}_index_iterator = {{ lookup }}_index_type::const_iterator;
-  static std::pair<{{ lookup }}_index_iterator, {{ lookup }}_index_iterator>
 
+  static std::pair<{{ lookup }}_index_iterator, {{ lookup }}_index_iterator>
   {{ lookup }}(const {{ lookup_spec.type }}& x) {
     return {{ lookup }}_index.equal_range(x);
   }

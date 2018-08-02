@@ -41,8 +41,8 @@ struct Judgment {
   static lookup_by_type_index_type lookup_by_type_index;
   using lookup_by_type_index_iterator =
       lookup_by_type_index_type::const_iterator;
-  static std::pair<lookup_by_type_index_iterator, lookup_by_type_index_iterator>
 
+  static std::pair<lookup_by_type_index_iterator, lookup_by_type_index_iterator>
   lookup_by_type(const token &x) {
     return lookup_by_type_index.equal_range(x);
   }
@@ -61,9 +61,9 @@ struct Judgment {
   static lookup_by_token_index_type lookup_by_token_index;
   using lookup_by_token_index_iterator =
       lookup_by_token_index_type::const_iterator;
+
   static std::pair<lookup_by_token_index_iterator,
                    lookup_by_token_index_iterator>
-
   lookup_by_token(const token &x) {
     return lookup_by_token_index.equal_range(x);
   }
