@@ -28,9 +28,7 @@ struct Application {
   Application(const rule &via,
               const std::unordered_set<application> &condition_proofs,
               const judgment &result, const std::vector<judgment> &args)
-      :
-
-        via(via), condition_proofs(condition_proofs), result(result),
+      : via(via), condition_proofs(condition_proofs), result(result),
         args(args) {}
 
   static application

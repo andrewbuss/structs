@@ -17,10 +17,7 @@ struct Token {
 
   Token() : s(std::string()) {}
 
-  Token(const std::string &s)
-      :
-
-        s(s) {}
+  Token(const std::string &s) : s(s) {}
 
   static token create(const std::string &s) {
     all_tokens.push_back(Token{s});

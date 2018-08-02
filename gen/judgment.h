@@ -20,10 +20,7 @@ struct Judgment {
 
   Judgment() : cs(std::vector<token>()) {}
 
-  Judgment(const std::vector<token> &cs)
-      :
-
-        cs(cs) {}
+  Judgment(const std::vector<token> &cs) : cs(cs) {}
 
   static judgment create(const std::vector<token> &cs) {
     all_judgments.push_back(Judgment{cs});

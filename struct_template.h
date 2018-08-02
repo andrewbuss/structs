@@ -40,9 +40,7 @@ struct {{ name }} {
   {{ name }}(
   {%- for member, type in members.items() -%}
     {{ comma() }}const {{ type }}& {{ member }}
-  {%- endfor -%}):
-
-  {% set comma = joiner(", ") -%}
+  {%- endfor -%}):{% set comma = joiner(", ") -%}
   {%- for member, type in members.items() -%}
     {{ comma() }}{{ member }}({{ member }})
   {%- endfor -%}

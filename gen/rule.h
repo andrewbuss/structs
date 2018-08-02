@@ -23,9 +23,7 @@ struct Rule {
 
   Rule(const std::unordered_set<judgment> &conditions,
        const judgment &conclusion)
-      :
-
-        conditions(conditions), conclusion(conclusion) {}
+      : conditions(conditions), conclusion(conclusion) {}
 
   static rule create(const std::unordered_set<judgment> &conditions,
                      const judgment &conclusion) {
