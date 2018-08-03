@@ -51,8 +51,12 @@ struct {{ name }} {
     {%- for member, type in members.items() -%}
     {{ comma() }}const {{ type }}& {{ member }}
     {%- endfor -%}) {
+    return {{ name }}({{ all_members }}).save();
+  }
+
+  {{ lname }} save() const {
     all_{{ lname }}s.push_back({{ name }}{ {{all_members}} });
-    return index(all_{{ plural }}.size() - 1);
+    return all_{{ plural }}.size() - 1;
   }
 
   static std::vector<{{ name }}> all_{{ plural }};

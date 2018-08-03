@@ -19,9 +19,11 @@ struct Token {
 
   Token(const std::string &s) : s(s) {}
 
-  static token create(const std::string &s) {
+  static token create(const std::string &s) { return Token(s).save(); }
+
+  token save() const {
     all_tokens.push_back(Token{s});
-    return index(all_tokens.size() - 1);
+    return all_tokens.size() - 1;
   }
 
   static std::vector<Token> all_tokens;

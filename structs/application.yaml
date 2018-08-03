@@ -1,11 +1,18 @@
 name: Application
 includes:
   - rule.h
+  - list
 members:
   via: rule
   args: std::vector<judgment>
   condition_proofs: std::unordered_set<application>
   result: judgment
+unique_index: lookup_by_hypothesis
+properties:
+  hypothesis_or_empty:
+    type: judgment
+    body: "{ if(via != 0) return 0;
+             else return result; }"
 lookups:
   lookup_by_rule:
     type: rule
@@ -13,3 +20,18 @@ lookups:
   lookup_by_result:
     type: judgment
     getter: result
+  lookup_by_hypothesis:
+    type: judgment
+    getter: hypothesis_or_empty()
+    unique: true
+extra: >-
+
+  Application(judgment j)
+   : via(0), result(j) { }
+
+  inline static application get_or_create_hypothesis(judgment j) {
+    return get_or_create(j);
+  }
+  static application create(judgment j) {
+    return Application(j).save();
+  }

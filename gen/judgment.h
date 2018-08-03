@@ -23,8 +23,12 @@ struct Judgment {
   Judgment(const std::vector<token> &cs) : cs(cs) {}
 
   static judgment create(const std::vector<token> &cs) {
+    return Judgment(cs).save();
+  }
+
+  judgment save() const {
     all_judgments.push_back(Judgment{cs});
-    return index(all_judgments.size() - 1);
+    return all_judgments.size() - 1;
   }
 
   static std::vector<Judgment> all_judgments;
