@@ -14,7 +14,7 @@ using judgment = int;
 struct Judgment {
   // {'cs': 'std::vector<token>'}
   const std::vector<token> cs;
-  // {'body': 'cs[0]', 'type': 'token'}
+  // {'body': '{ return cs[0]; }', 'type': 'token'}
   token type() const { return cs[0]; }
   static const Judgment &get(judgment j) { return all_judgments[j]; }
 

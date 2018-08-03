@@ -12,20 +12,19 @@
 using rule = int;
 
 struct Rule {
-  // {'conditions': 'std::unordered_set<judgment>', 'conclusion': 'judgment'}
-  const std::unordered_set<judgment> conditions;
+  // {'conditions': 'std::vector<judgment>', 'conclusion': 'judgment'}
+  const std::vector<judgment> conditions;
   const judgment conclusion;
-  // {'body': {}, 'type': 'const std::unordered_map<token, int>'}
+  // {'body': '{ return {}; }', 'type': 'const std::unordered_map<token, int>'}
   const std::unordered_map<token, int> signature() const { return {}; }
   static const Rule &get(rule r) { return all_rules[r]; }
 
-  Rule() : conditions(std::unordered_set<judgment>()), conclusion(judgment()) {}
+  Rule() : conditions(std::vector<judgment>()), conclusion(judgment()) {}
 
-  Rule(const std::unordered_set<judgment> &conditions,
-       const judgment &conclusion)
+  Rule(const std::vector<judgment> &conditions, const judgment &conclusion)
       : conditions(conditions), conclusion(conclusion) {}
 
-  static rule create(const std::unordered_set<judgment> &conditions,
+  static rule create(const std::vector<judgment> &conditions,
                      const judgment &conclusion) {
     all_rules.push_back(Rule{conditions, conclusion});
     return index(all_rules.size() - 1);
@@ -37,6 +36,9 @@ struct Rule {
     const auto obj = all_rules[r];
     return r;
   }
+
+  using application = int;
+  application apply(rule, std::unordered_set<application> &);
 };
 
 std::ostream &operator<<(std::ostream &os, const Rule &r);

@@ -25,7 +25,7 @@ struct {{ name }} {
 
   {% for property, prop_spec in (properties or {}).items() -%}
   // {{ prop_spec }}
-  {{ prop_spec.type }} {{ property }}() const { return {{ prop_spec.body }}; }
+  {{ prop_spec.type }} {{ property }}() const {{ prop_spec.body }}
   {%- endfor %}
   static const {{ name }} &get({{ lname }} {{ abbr }}) { return all_{{ lname }}s[{{ abbr }}]; }
 
@@ -101,6 +101,8 @@ struct {{ name }} {
     {%- endfor %}
     return {{ abbr }};
   }
+
+  {{ extra }}
 };
 
 std::ostream& operator<<(std::ostream& os, const {{ name }}& {{ abbr }});

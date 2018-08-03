@@ -6,7 +6,7 @@ members:
 properties:
   type:
     type: token
-    body: cs[0]
+    body: "{ return cs[0]; }"
 unique_index: lookup_by_cs
 lookups:
   lookup_by_cs:

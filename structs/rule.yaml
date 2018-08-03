@@ -2,12 +2,12 @@ name: Rule
 includes:
   - judgment.h
 members:
-  conditions: std::unordered_set<judgment>
+  conditions: std::vector<judgment>
   conclusion: judgment
 properties:
   signature:
     type: const std::unordered_map<token, int>
-    body: {}
+    body: "{ return {}; }"
 multilookups:
   lookup_by_conclusion:
     getter: conclusion
@@ -16,3 +16,6 @@ multilookups:
   lookup_by_condition:
     getter: conditions
     iterable: true
+extra:
+  using application = int;
+  application apply(rule, std::unordered_set<application>&);
