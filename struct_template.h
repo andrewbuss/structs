@@ -56,7 +56,7 @@ struct {{ name }} {
 
   {{ lname }} save() const {
     all_{{ lname }}s.push_back({{ name }}{ {{all_members}} });
-    return all_{{ plural }}.size() - 1;
+    return index(all_{{ plural }}.size() - 1);
   }
 
   static std::vector<{{ name }}> all_{{ plural }};

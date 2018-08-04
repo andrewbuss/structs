@@ -14,8 +14,14 @@ using judgment = int;
 struct Judgment {
   // {'cs': 'std::vector<token>'}
   const std::vector<token> cs;
-  // {'body': '{ return cs[0]; }', 'type': 'token'}
-  token type() const { return cs[0]; }
+  // {'body': '{ if(cs.size() > 0) return cs[0]; else return 0; }', 'type':
+  // 'token'}
+  token type() const {
+    if (cs.size() > 0)
+      return cs[0];
+    else
+      return 0;
+  }
   static const Judgment &get(judgment j) { return all_judgments[j]; }
 
   Judgment() : cs(std::vector<token>()) {}
@@ -28,7 +34,7 @@ struct Judgment {
 
   judgment save() const {
     all_judgments.push_back(Judgment{cs});
-    return all_judgments.size() - 1;
+    return index(all_judgments.size() - 1);
   }
 
   static std::vector<Judgment> all_judgments;

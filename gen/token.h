@@ -23,7 +23,7 @@ struct Token {
 
   token save() const {
     all_tokens.push_back(Token{s});
-    return all_tokens.size() - 1;
+    return index(all_tokens.size() - 1);
   }
 
   static std::vector<Token> all_tokens;

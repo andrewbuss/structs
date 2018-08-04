@@ -50,7 +50,7 @@ struct Application {
   application save() const {
     all_applications.push_back(
         Application{via, condition_proofs, result, args});
-    return all_applications.size() - 1;
+    return index(all_applications.size() - 1);
   }
 
   static std::vector<Application> all_applications;

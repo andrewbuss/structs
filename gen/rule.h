@@ -42,7 +42,7 @@ struct Rule {
 
   rule save() const {
     all_rules.push_back(Rule{conclusion, conditions, label});
-    return all_rules.size() - 1;
+    return index(all_rules.size() - 1);
   }
 
   static std::vector<Rule> all_rules;
