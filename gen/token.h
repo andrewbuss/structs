@@ -7,49 +7,46 @@
 #include <unordered_set>
 #include <vector>
 
-using token = int;
+struct Token;
+
+struct token {
+  int i;
+  const Token &operator*() const;
+  operator bool() const { return i != 0; }
+  token() : i(0) {}
+  token(int i) : i(i) {}
+  token operator=(const token &other) { return i = other.i; }
+  bool operator==(const token &other) const { return i == other.i; }
+  bool operator!=(const token &other) const { return i != other.i; }
+  const Token *operator->() const;
+};
+
+namespace std {
+template <> struct hash<token> {
+  size_t operator()(const token k) const { return hash<int>{}(k.i); }
+};
+} // namespace std
 
 struct Token {
   // {'s': 'std::string'}
   const std::string s;
 
-  static const Token &get(token t) { return all_tokens[t]; }
-
   Token() : s(std::string()) {}
 
   Token(const std::string &s) : s(s) {}
+  static token create(const std::string &s);
 
-  static token create(const std::string &s) { return Token(s).save(); }
+  static token get_or_create(const std::string &x);
+};
 
-  token save() const {
-    all_tokens.push_back(Token{s});
-    return index(all_tokens.size() - 1);
-  }
-
-  static std::vector<Token> all_tokens;
-
-  static token get_or_create(const std::string &x) {
-    auto t = lookup_by_s(x);
-    if (!t)
-      return create(x);
-    return t;
-  }
+struct TokenIndex {
 
   // {'getter': 's', 'unique': True, 'type': 'std::string'}
   static std::unordered_map<std::string, token> lookup_by_s_index;
-  static token lookup_by_s(const std::string &x) {
-    auto it = lookup_by_s_index.find(x);
-    if (it == lookup_by_s_index.end())
-      return 0;
-    return it->second;
-  }
+  static token lookup_by_s(const std::string &x);
 
-  static token index(const token t) {
-    const auto obj = all_tokens[t];
-    const auto &obj_s = obj.s;
-    lookup_by_s_index[obj_s] = t;
-    return t;
-  }
+  static token index(token);
 };
 
-std::ostream &operator<<(std::ostream &os, const Token &t);
+std::ostream &operator<<(std::ostream &os, const Token &);
+std::ostream &operator<<(std::ostream &os, const token &);

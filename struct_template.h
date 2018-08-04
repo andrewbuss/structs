@@ -15,7 +15,37 @@
 {%- set plural = lname + 's' %}
 {%- set abbr = lname[0] %}
 {%- set all_members = ', '.join(members.keys()) %}
-using {{ lname }} = int;
+
+{% for lookup, lookup_spec in (lookups or {}).items() %}
+{%- if not lookup_spec.unique %}
+// {{ lookup_spec }}
+//#define {{ lookup }}_index_type std::unordered_multimap<{{ lookup_spec.type }}, {{ lname }}>
+//#define {{ lookup }}_index_iterator {{ lookup }}_index_type::const_iterator
+{% endif %}
+{% endfor %}
+
+struct {{ name }};
+
+struct {{ lname }} {
+  int i;
+  const {{ name }}& operator*() const;
+  operator bool() const { return i != 0; }
+  {{ lname }} () : i(0) {}
+  {{ lname }} (int i) : i(i) {}
+  {{ lname }} operator=(const {{ lname }}& other) { return i = other.i; }
+  bool operator==(const {{ lname }}& other) const { return i == other.i; }
+  bool operator!=(const {{ lname }}& other) const { return i != other.i; }
+  const {{ name }}* operator->() const;
+};
+
+
+namespace std {
+  template <> struct hash<{{ lname }}> {
+    size_t operator()( const {{ lname }} k ) const {
+      return hash<int>{}(k.i);
+    }
+  };
+}
 
 struct {{ name }} {
   // {{ members }}
@@ -25,88 +55,55 @@ struct {{ name }} {
 
   {% for property, prop_spec in (properties or {}).items() -%}
   // {{ prop_spec }}
-  {{ prop_spec.type }} {{ property }}() const {{ prop_spec.body }}
+  {{ prop_spec.type }} {{ property }}() const;
   {%- endfor %}
-  static const {{ name }} &get({{ lname }} {{ abbr }}) { return all_{{ lname }}s[{{ abbr }}]; }
 
   {% set comma = joiner(", ") -%}
   {{ name }}():
   {%- for member, type in members.items() -%}
-  {{ comma() }}{{ member }}({{ type }} ())
+    {{ comma() }}{{ member }}({{ type }} ())
   {%- endfor -%}
   {}
 
   {% set comma = joiner(", ") -%}
   {{ name }}(
-  {%- for member, type in members.items() -%}
+    {%- for member, type in members.items() -%}
     {{ comma() }}const {{ type }}& {{ member }}
-  {%- endfor -%}):{% set comma = joiner(", ") -%}
+    {%- endfor -%}):
+  {% set comma = joiner(", ") -%}
   {%- for member, type in members.items() -%}
     {{ comma() }}{{ member }}({{ member }})
   {%- endfor -%}
   {}
-
-  {% set comma = joiner(", ") -%}
   static {{ lname }} create(
-    {%- for member, type in members.items() -%}
+  {% set comma = joiner(", ") -%}
+  {%- for member, type in members.items() -%}
     {{ comma() }}const {{ type }}& {{ member }}
-    {%- endfor -%}) {
-    return {{ name }}({{ all_members }}).save();
-  }
+  {%- endfor -%});
 
-  {{ lname }} save() const {
-    all_{{ lname }}s.push_back({{ name }}{ {{all_members}} });
-    return index(all_{{ plural }}.size() - 1);
-  }
-
-  static std::vector<{{ name }}> all_{{ plural }};
   {% if unique_index %}
-  static {{ lname }} get_or_create(const {{ lookups[unique_index].type }}& x) {
-    auto {{ abbr }} = {{ unique_index }}(x);
-    if (!{{ abbr }}) return create(x);
-    return {{ abbr }};
-  }
+  static {{ lname }} get_or_create(const {{ lookups[unique_index].type }}& x);
   {%- endif %}
-  {% for lookup, lookup_spec in (lookups or {}).items() %}
-  // {{ lookup_spec }}
-  {%- if lookup_spec.unique %}
-  static std::unordered_map<{{ lookup_spec.type }}, {{ lname }}> {{ lookup }}_index;
-  static {{ lname }} {{ lookup }}(const {{ lookup_spec.type }}& x) {
-    auto it = {{ lookup }}_index.find(x);
-    if (it == {{ lookup }}_index.end())
-      return 0;
-    return it->second;
-  }
-  {% else %}
-  using {{ lookup }}_index_type = std::unordered_multimap<{{ lookup_spec.type }}, {{ lname }}>;
-  static {{ lookup }}_index_type {{ lookup }}_index;
-  using {{ lookup }}_index_iterator = {{ lookup }}_index_type::const_iterator;
-
-  static std::pair<{{ lookup }}_index_iterator, {{ lookup }}_index_iterator>
-  {{ lookup }}(const {{ lookup_spec.type }}& x) {
-    return {{ lookup }}_index.equal_range(x);
-  }
-  {% endif %}
-  {% endfor %}
-  static {{ lname }} index(const {{ lname }} {{ abbr }}) {
-    const auto obj = all_{{ plural }}[{{ abbr }}];
-    {%- for lookup, lookup_spec in (lookups or {}).items() -%}
-    {%- set prop_var = 'obj_' + lookup_spec.getter.strip('()') -%}
-    {% if lookup_spec.iterable %}
-    for(const auto& {{ prop_var }} : obj.{{ lookup_spec.getter }})
-    {% else %}
-    const auto& {{ prop_var }} = obj.{{ lookup_spec.getter }};
-    {% endif %}
-    {%- if lookup_spec.unique -%}
-    {{ lookup }}_index[{{ prop_var }}] = {{ abbr }};
-    {%- else -%}
-    {{ lookup }}_index.emplace({{prop_var }}, {{ abbr }});
-    {%- endif %}
-    {%- endfor %}
-    return {{ abbr }};
-  }
 
   {{ extra }}
 };
 
-std::ostream& operator<<(std::ostream& os, const {{ name }}& {{ abbr }});
+struct {{ name }}Index {
+  {% for lookup, lookup_spec in (lookups or {}).items() %}
+  // {{ lookup_spec }}
+  {%- if lookup_spec.unique %}
+  static std::unordered_map<{{ lookup_spec.type }}, {{ lname }}> {{ lookup }}_index;
+  static {{ lname }} {{ lookup }}(const {{ lookup_spec.type }}& x);
+  {% else %}
+  using {{ lookup }}_index_type = std::unordered_multimap<{{ lookup_spec.type }}, {{ lname }}>;
+  static {{ lookup }}_index_type {{ lookup }}_index;
+  using {{ lookup }}_index_iterator = {{ lookup }}_index_type::const_iterator;
+  static std::pair<{{ lookup }}_index_iterator, {{ lookup }}_index_iterator>
+  {{ lookup }}(const {{ lookup_spec.type }}& x);
+  {% endif %}
+  {% endfor %}
+  static {{ lname }} index({{ lname }});
+};
+
+std::ostream& operator<<(std::ostream& os, const {{ name }}&);
+std::ostream& operator<<(std::ostream& os, const {{ lname }}&);

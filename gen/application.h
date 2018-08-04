@@ -11,7 +11,35 @@
 
 #include <list>
 
-using application = int;
+// {'getter': 'via', 'type': 'rule'}
+//#define lookup_by_rule_index_type std::unordered_multimap<rule, application>
+//#define lookup_by_rule_index_iterator
+//lookup_by_rule_index_type::const_iterator
+
+// {'getter': 'result', 'type': 'judgment'}
+//#define lookup_by_result_index_type std::unordered_multimap<judgment,
+//application> #define lookup_by_result_index_iterator
+//lookup_by_result_index_type::const_iterator
+
+struct Application;
+
+struct application {
+  int i;
+  const Application &operator*() const;
+  operator bool() const { return i != 0; }
+  application() : i(0) {}
+  application(int i) : i(i) {}
+  application operator=(const application &other) { return i = other.i; }
+  bool operator==(const application &other) const { return i == other.i; }
+  bool operator!=(const application &other) const { return i != other.i; }
+  const Application *operator->() const;
+};
+
+namespace std {
+template <> struct hash<application> {
+  size_t operator()(const application k) const { return hash<int>{}(k.i); }
+};
+} // namespace std
 
 struct Application {
   // {'via': 'rule', 'condition_proofs': 'std::unordered_set<application>',
@@ -20,15 +48,8 @@ struct Application {
   const std::unordered_set<application> condition_proofs;
   const judgment result;
   const std::vector<judgment> args;
-  // {'body': '{ if(via != 0) return 0; else return result; }', 'type':
-  // 'judgment'}
-  judgment hypothesis_or_empty() const {
-    if (via != 0)
-      return 0;
-    else
-      return result;
-  }
-  static const Application &get(application a) { return all_applications[a]; }
+  // {'body': '{ if(via) return 0; else return result; }', 'type': 'judgment'}
+  judgment hypothesis_or_empty() const;
 
   Application()
       : via(rule()), condition_proofs(std::unordered_set<application>()),
@@ -39,48 +60,34 @@ struct Application {
               const judgment &result, const std::vector<judgment> &args)
       : via(via), condition_proofs(condition_proofs), result(result),
         args(args) {}
-
   static application
   create(const rule &via,
          const std::unordered_set<application> &condition_proofs,
-         const judgment &result, const std::vector<judgment> &args) {
-    return Application(via, condition_proofs, result, args).save();
-  }
+         const judgment &result, const std::vector<judgment> &args);
 
-  application save() const {
-    all_applications.push_back(
-        Application{via, condition_proofs, result, args});
-    return index(all_applications.size() - 1);
-  }
+  static application get_or_create(const judgment &x);
 
-  static std::vector<Application> all_applications;
+  Application(judgment j) : via(0), result(j) {}
 
-  static application get_or_create(const judgment &x) {
-    auto a = lookup_by_hypothesis(x);
-    if (!a)
-      return create(x);
-    return a;
+  inline static application get_or_create_hypothesis(judgment j) {
+    return get_or_create(j);
   }
+  static application create(judgment j) { return create(rule(), {}, j, {}); }
+};
+
+struct ApplicationIndex {
 
   // {'getter': 'via', 'type': 'rule'}
   using lookup_by_rule_index_type = std::unordered_multimap<rule, application>;
   static lookup_by_rule_index_type lookup_by_rule_index;
   using lookup_by_rule_index_iterator =
       lookup_by_rule_index_type::const_iterator;
-
   static std::pair<lookup_by_rule_index_iterator, lookup_by_rule_index_iterator>
-  lookup_by_rule(const rule &x) {
-    return lookup_by_rule_index.equal_range(x);
-  }
+  lookup_by_rule(const rule &x);
 
   // {'getter': 'hypothesis_or_empty()', 'unique': True, 'type': 'judgment'}
   static std::unordered_map<judgment, application> lookup_by_hypothesis_index;
-  static application lookup_by_hypothesis(const judgment &x) {
-    auto it = lookup_by_hypothesis_index.find(x);
-    if (it == lookup_by_hypothesis_index.end())
-      return 0;
-    return it->second;
-  }
+  static application lookup_by_hypothesis(const judgment &x);
 
   // {'getter': 'result', 'type': 'judgment'}
   using lookup_by_result_index_type =
@@ -88,30 +95,12 @@ struct Application {
   static lookup_by_result_index_type lookup_by_result_index;
   using lookup_by_result_index_iterator =
       lookup_by_result_index_type::const_iterator;
-
   static std::pair<lookup_by_result_index_iterator,
                    lookup_by_result_index_iterator>
-  lookup_by_result(const judgment &x) {
-    return lookup_by_result_index.equal_range(x);
-  }
+  lookup_by_result(const judgment &x);
 
-  static application index(const application a) {
-    const auto obj = all_applications[a];
-    const auto &obj_via = obj.via;
-    lookup_by_rule_index.emplace(obj_via, a);
-    const auto &obj_hypothesis_or_empty = obj.hypothesis_or_empty();
-    lookup_by_hypothesis_index[obj_hypothesis_or_empty] = a;
-    const auto &obj_result = obj.result;
-    lookup_by_result_index.emplace(obj_result, a);
-    return a;
-  }
-
-  Application(judgment j) : via(0), result(j) {}
-
-  inline static application get_or_create_hypothesis(judgment j) {
-    return get_or_create(j);
-  }
-  static application create(judgment j) { return Application(j).save(); }
+  static application index(application);
 };
 
-std::ostream &operator<<(std::ostream &os, const Application &a);
+std::ostream &operator<<(std::ostream &os, const Application &);
+std::ostream &operator<<(std::ostream &os, const application &);

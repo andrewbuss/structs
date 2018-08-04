@@ -6,7 +6,7 @@ members:
 properties:
   type:
     type: token
-    body: "{ if(cs.size() > 0) return cs[0]; else return 0; }"
+    body: "{ if(cs.size() > 0) return cs[0]; else return token(); }"
 unique_index: lookup_by_cs
 lookups:
   lookup_by_cs:

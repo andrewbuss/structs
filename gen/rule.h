@@ -11,7 +11,52 @@
 
 #include <set>
 
-using rule = int;
+// {'getter': 'signature()', 'type': 'std::multiset<token>'}
+//#define lookup_by_signature_index_type
+//std::unordered_multimap<std::multiset<token>, rule> #define
+//lookup_by_signature_index_iterator
+//lookup_by_signature_index_type::const_iterator
+
+// {'getter': 'conclusion', 'type': 'judgment'}
+//#define lookup_by_conclusion_index_type std::unordered_multimap<judgment,
+//rule> #define lookup_by_conclusion_index_iterator
+//lookup_by_conclusion_index_type::const_iterator
+
+// {'getter': 'conclusion_type()', 'type': 'token'}
+//#define lookup_by_conclusion_type_index_type std::unordered_multimap<token,
+//rule> #define lookup_by_conclusion_type_index_iterator
+//lookup_by_conclusion_type_index_type::const_iterator
+
+// {'getter': 'label', 'type': 'token'}
+//#define lookup_by_label_index_type std::unordered_multimap<token, rule>
+//#define lookup_by_label_index_iterator
+//lookup_by_label_index_type::const_iterator
+
+// {'getter': 'conditions', 'type': 'std::vector<judgment>', 'iterable': True}
+//#define lookup_by_condition_index_type
+//std::unordered_multimap<std::vector<judgment>, rule> #define
+//lookup_by_condition_index_iterator
+//lookup_by_condition_index_type::const_iterator
+
+struct Rule;
+
+struct rule {
+  int i;
+  const Rule &operator*() const;
+  operator bool() const { return i != 0; }
+  rule() : i(0) {}
+  rule(int i) : i(i) {}
+  rule operator=(const rule &other) { return i = other.i; }
+  bool operator==(const rule &other) const { return i == other.i; }
+  bool operator!=(const rule &other) const { return i != other.i; }
+  const Rule *operator->() const;
+};
+
+namespace std {
+template <> struct hash<rule> {
+  size_t operator()(const rule k) const { return hash<int>{}(k.i); }
+};
+} // namespace std
 
 struct Rule {
   // {'conclusion': 'judgment', 'conditions': 'std::vector<judgment>', 'label':
@@ -20,11 +65,9 @@ struct Rule {
   const std::vector<judgment> conditions;
   const token label;
   // {'body': '{ return {}; }', 'type': 'const std::multiset<token>'}
-  const std::multiset<token> signature() const {
-    return {};
-  } // {'body': '{ return Judgment::get(conclusion).type(); }', 'type': 'token'}
-  token conclusion_type() const { return Judgment::get(conclusion).type(); }
-  static const Rule &get(rule r) { return all_rules[r]; }
+  const std::multiset<token> signature()
+      const; // {'body': '{ return conclusion->type(); }', 'type': 'token'}
+  token conclusion_type() const;
 
   Rule()
       : conclusion(judgment()), conditions(std::vector<judgment>()),
@@ -33,19 +76,15 @@ struct Rule {
   Rule(const judgment &conclusion, const std::vector<judgment> &conditions,
        const token &label)
       : conclusion(conclusion), conditions(conditions), label(label) {}
-
   static rule create(const judgment &conclusion,
                      const std::vector<judgment> &conditions,
-                     const token &label) {
-    return Rule(conclusion, conditions, label).save();
-  }
+                     const token &label);
 
-  rule save() const {
-    all_rules.push_back(Rule{conclusion, conditions, label});
-    return index(all_rules.size() - 1);
-  }
+  using application = int;
+  application apply(rule, std::unordered_set<application> &);
+};
 
-  static std::vector<Rule> all_rules;
+struct RuleIndex {
 
   // {'getter': 'signature()', 'type': 'std::multiset<token>'}
   using lookup_by_signature_index_type =
@@ -53,12 +92,9 @@ struct Rule {
   static lookup_by_signature_index_type lookup_by_signature_index;
   using lookup_by_signature_index_iterator =
       lookup_by_signature_index_type::const_iterator;
-
   static std::pair<lookup_by_signature_index_iterator,
                    lookup_by_signature_index_iterator>
-  lookup_by_signature(const std::multiset<token> &x) {
-    return lookup_by_signature_index.equal_range(x);
-  }
+  lookup_by_signature(const std::multiset<token> &x);
 
   // {'getter': 'conclusion', 'type': 'judgment'}
   using lookup_by_conclusion_index_type =
@@ -66,12 +102,9 @@ struct Rule {
   static lookup_by_conclusion_index_type lookup_by_conclusion_index;
   using lookup_by_conclusion_index_iterator =
       lookup_by_conclusion_index_type::const_iterator;
-
   static std::pair<lookup_by_conclusion_index_iterator,
                    lookup_by_conclusion_index_iterator>
-  lookup_by_conclusion(const judgment &x) {
-    return lookup_by_conclusion_index.equal_range(x);
-  }
+  lookup_by_conclusion(const judgment &x);
 
   // {'getter': 'conclusion_type()', 'type': 'token'}
   using lookup_by_conclusion_type_index_type =
@@ -79,24 +112,18 @@ struct Rule {
   static lookup_by_conclusion_type_index_type lookup_by_conclusion_type_index;
   using lookup_by_conclusion_type_index_iterator =
       lookup_by_conclusion_type_index_type::const_iterator;
-
   static std::pair<lookup_by_conclusion_type_index_iterator,
                    lookup_by_conclusion_type_index_iterator>
-  lookup_by_conclusion_type(const token &x) {
-    return lookup_by_conclusion_type_index.equal_range(x);
-  }
+  lookup_by_conclusion_type(const token &x);
 
   // {'getter': 'label', 'type': 'token'}
   using lookup_by_label_index_type = std::unordered_multimap<token, rule>;
   static lookup_by_label_index_type lookup_by_label_index;
   using lookup_by_label_index_iterator =
       lookup_by_label_index_type::const_iterator;
-
   static std::pair<lookup_by_label_index_iterator,
                    lookup_by_label_index_iterator>
-  lookup_by_label(const token &x) {
-    return lookup_by_label_index.equal_range(x);
-  }
+  lookup_by_label(const token &x);
 
   // {'getter': 'conditions', 'type': 'std::vector<judgment>', 'iterable': True}
   using lookup_by_condition_index_type =
@@ -104,30 +131,12 @@ struct Rule {
   static lookup_by_condition_index_type lookup_by_condition_index;
   using lookup_by_condition_index_iterator =
       lookup_by_condition_index_type::const_iterator;
-
   static std::pair<lookup_by_condition_index_iterator,
                    lookup_by_condition_index_iterator>
-  lookup_by_condition(const std::vector<judgment> &x) {
-    return lookup_by_condition_index.equal_range(x);
-  }
+  lookup_by_condition(const std::vector<judgment> &x);
 
-  static rule index(const rule r) {
-    const auto obj = all_rules[r];
-    const auto &obj_signature = obj.signature();
-    lookup_by_signature_index.emplace(obj_signature, r);
-    const auto &obj_conclusion = obj.conclusion;
-    lookup_by_conclusion_index.emplace(obj_conclusion, r);
-    const auto &obj_conclusion_type = obj.conclusion_type();
-    lookup_by_conclusion_type_index.emplace(obj_conclusion_type, r);
-    const auto &obj_label = obj.label;
-    lookup_by_label_index.emplace(obj_label, r);
-    for (const auto &obj_conditions : obj.conditions)
-      lookup_by_condition_index.emplace(obj_conditions, r);
-    return r;
-  }
-
-  using application = int;
-  application apply(rule, std::unordered_set<application> &);
+  static rule index(rule);
 };
 
-std::ostream &operator<<(std::ostream &os, const Rule &r);
+std::ostream &operator<<(std::ostream &os, const Rule &);
+std::ostream &operator<<(std::ostream &os, const rule &);

@@ -1,20 +1,90 @@
+
+
 #include <judgment.h>
 #include <rule.h>
 
 #include <set>
 
-std::vector<Rule> Rule::all_rules{{}};
+std::vector<Rule> all_rules{{}};
+const Rule *rule::operator->() const { return all_rules.data() + i; }
+const Rule &rule::operator*() const { return all_rules[i]; }
 
-Rule::lookup_by_signature_index_type Rule::lookup_by_signature_index;
+RuleIndex::lookup_by_signature_index_type RuleIndex::lookup_by_signature_index;
 
-Rule::lookup_by_conclusion_index_type Rule::lookup_by_conclusion_index;
+RuleIndex::lookup_by_conclusion_index_type
+    RuleIndex::lookup_by_conclusion_index;
 
-Rule::lookup_by_conclusion_type_index_type
-    Rule::lookup_by_conclusion_type_index;
+RuleIndex::lookup_by_conclusion_type_index_type
+    RuleIndex::lookup_by_conclusion_type_index;
 
-Rule::lookup_by_label_index_type Rule::lookup_by_label_index;
+RuleIndex::lookup_by_label_index_type RuleIndex::lookup_by_label_index;
 
-Rule::lookup_by_condition_index_type Rule::lookup_by_condition_index;
+RuleIndex::lookup_by_condition_index_type RuleIndex::lookup_by_condition_index;
+
+// {'body': '{ return {}; }', 'type': 'const std::multiset<token>'}
+const std::multiset<token> Rule::signature() const {
+  { return {}; }
+} // {'body': '{ return conclusion->type(); }', 'type': 'token'}
+token Rule::conclusion_type() const {
+  { return conclusion->type(); }
+}
+
+rule Rule::create(const judgment &conclusion,
+                  const std::vector<judgment> &conditions, const token &label) {
+  all_rules.push_back({conclusion, conditions, label});
+  rule r = {(int)all_rules.size() - 1};
+  return RuleIndex::index(r);
+}
+
+// {'getter': 'signature()', 'type': 'std::multiset<token>'}
+std::pair<RuleIndex::lookup_by_signature_index_iterator,
+          RuleIndex::lookup_by_signature_index_iterator>
+RuleIndex::lookup_by_signature(const std::multiset<token> &x) {
+  return lookup_by_signature_index.equal_range(x);
+}
+
+// {'getter': 'conclusion', 'type': 'judgment'}
+std::pair<RuleIndex::lookup_by_conclusion_index_iterator,
+          RuleIndex::lookup_by_conclusion_index_iterator>
+RuleIndex::lookup_by_conclusion(const judgment &x) {
+  return lookup_by_conclusion_index.equal_range(x);
+}
+
+// {'getter': 'conclusion_type()', 'type': 'token'}
+std::pair<RuleIndex::lookup_by_conclusion_type_index_iterator,
+          RuleIndex::lookup_by_conclusion_type_index_iterator>
+RuleIndex::lookup_by_conclusion_type(const token &x) {
+  return lookup_by_conclusion_type_index.equal_range(x);
+}
+
+// {'getter': 'label', 'type': 'token'}
+std::pair<RuleIndex::lookup_by_label_index_iterator,
+          RuleIndex::lookup_by_label_index_iterator>
+RuleIndex::lookup_by_label(const token &x) {
+  return lookup_by_label_index.equal_range(x);
+}
+
+// {'getter': 'conditions', 'type': 'std::vector<judgment>', 'iterable': True}
+std::pair<RuleIndex::lookup_by_condition_index_iterator,
+          RuleIndex::lookup_by_condition_index_iterator>
+RuleIndex::lookup_by_condition(const std::vector<judgment> &x) {
+  return lookup_by_condition_index.equal_range(x);
+}
+
+rule RuleIndex::index(const rule r) {
+  const auto &obj = *r;
+  const auto &obj_signature = obj.signature();
+  lookup_by_signature_index.emplace(obj_signature, r);
+  const auto &obj_conclusion = obj.conclusion;
+  lookup_by_conclusion_index.emplace(obj_conclusion, r);
+  const auto &obj_conclusion_type = obj.conclusion_type();
+  lookup_by_conclusion_type_index.emplace(obj_conclusion_type, r);
+  const auto &obj_label = obj.label;
+  lookup_by_label_index.emplace(obj_label, r);
+  for (const auto &obj_conditions : obj.conditions)
+    lookup_by_condition_index.emplace(obj_conditions, r);
+  return r;
+}
 
 std::ostream &operator<<(std::ostream &os, const Rule &r) {
   os << "Rule{";
@@ -23,3 +93,5 @@ std::ostream &operator<<(std::ostream &os, const Rule &r) {
   os << ", " << r.label;
   return os << "}";
 }
+
+std::ostream &operator<<(std::ostream &os, const rule &r) { return os << r.i; }

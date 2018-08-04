@@ -11,7 +11,7 @@ unique_index: lookup_by_hypothesis
 properties:
   hypothesis_or_empty:
     type: judgment
-    body: "{ if(via != 0) return 0;
+    body: "{ if(via) return 0;
              else return result; }"
 lookups:
   lookup_by_rule:
@@ -33,5 +33,5 @@ extra: >-
     return get_or_create(j);
   }
   static application create(judgment j) {
-    return Application(j).save();
+    return create(rule(), {}, j, {});
   }

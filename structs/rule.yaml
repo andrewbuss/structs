@@ -12,7 +12,7 @@ properties:
     body: "{ return {}; }"
   conclusion_type:
     type: token
-    body: "{ return Judgment::get(conclusion).type(); }"
+    body: "{ return conclusion->type(); }"
 lookups:
   lookup_by_conclusion:
     getter: conclusion

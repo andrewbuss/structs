@@ -5,6 +5,7 @@
 #include <rule.h>
 #include <token.h>
 #include <vector>
+#include <cassert>
 
 using namespace std;
 
@@ -27,13 +28,15 @@ int main() {
   token t3 = Token::get_or_create("foo");
   cout << t3 << endl;
 
+  assert(t == t3);
+  assert(t != t2);
+
   token wff = Token::get_or_create("wff");
   token turnstile = Token::get_or_create("|-");
   token x = Token::get_or_create("x");
   token y = Token::get_or_create("y");
   token equals = Token::get_or_create("=");
-  cout << Token::all_tokens << endl;
-  cout << Token::lookup_by_s_index << endl;
+  cout << TokenIndex::lookup_by_s_index << endl;
 
   judgment j1 = Judgment::get_or_create({wff, x});
   judgment j2 = Judgment::get_or_create({wff, y});
@@ -41,13 +44,12 @@ int main() {
   judgment j4 = Judgment::get_or_create({turnstile, x});
   judgment j5 = Judgment::get_or_create({turnstile, x, equals, y});
 
-  cout << Judgment::all_judgments << endl;
-  cout << Judgment::lookup_by_type_index << endl;
-  cout << "wff: " << range_to_vec<judgment>(Judgment::lookup_by_type(wff))
+  cout << JudgmentIndex::lookup_by_type_index << endl;
+  cout << "wff: " << range_to_vec<judgment>(JudgmentIndex::lookup_by_type(wff))
        << endl;
-  cout << "|-: " << range_to_vec<judgment>(Judgment::lookup_by_type(turnstile))
+  cout << "|-: " << range_to_vec<judgment>(JudgmentIndex::lookup_by_type(turnstile))
        << endl;
-  cout << "x: " << range_to_vec<judgment>(Judgment::lookup_by_token(x))
+  cout << "x: " << range_to_vec<judgment>(JudgmentIndex::lookup_by_token(x))
        << endl;
 
 }
