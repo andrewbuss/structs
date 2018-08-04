@@ -16,14 +16,6 @@
 {%- set abbr = lname[0] %}
 {%- set all_members = ', '.join(members.keys()) %}
 
-{% for lookup, lookup_spec in (lookups or {}).items() %}
-{%- if not lookup_spec.unique %}
-// {{ lookup_spec }}
-//#define {{ lookup }}_index_type std::unordered_multimap<{{ lookup_spec.type }}, {{ lname }}>
-//#define {{ lookup }}_index_iterator {{ lookup }}_index_type::const_iterator
-{% endif %}
-{% endfor %}
-
 struct {{ name }};
 
 struct {{ lname }} {
@@ -37,7 +29,6 @@ struct {{ lname }} {
   bool operator!=(const {{ lname }}& other) const { return i != other.i; }
   const {{ name }}* operator->() const;
 };
-
 
 namespace std {
   template <> struct hash<{{ lname }}> {

@@ -9,16 +9,6 @@
 
 #include <token.h>
 
-// {'getter': 'type()', 'type': 'token'}
-//#define lookup_by_type_index_type std::unordered_multimap<token, judgment>
-//#define lookup_by_type_index_iterator
-//lookup_by_type_index_type::const_iterator
-
-// {'getter': 'cs', 'type': 'token', 'iterable': True}
-//#define lookup_by_token_index_type std::unordered_multimap<token, judgment>
-//#define lookup_by_token_index_iterator
-//lookup_by_token_index_type::const_iterator
-
 struct Judgment;
 
 struct judgment {

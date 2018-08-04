@@ -11,33 +11,6 @@
 
 #include <set>
 
-// {'getter': 'signature()', 'type': 'std::multiset<token>'}
-//#define lookup_by_signature_index_type
-//std::unordered_multimap<std::multiset<token>, rule> #define
-//lookup_by_signature_index_iterator
-//lookup_by_signature_index_type::const_iterator
-
-// {'getter': 'conclusion', 'type': 'judgment'}
-//#define lookup_by_conclusion_index_type std::unordered_multimap<judgment,
-//rule> #define lookup_by_conclusion_index_iterator
-//lookup_by_conclusion_index_type::const_iterator
-
-// {'getter': 'conclusion_type()', 'type': 'token'}
-//#define lookup_by_conclusion_type_index_type std::unordered_multimap<token,
-//rule> #define lookup_by_conclusion_type_index_iterator
-//lookup_by_conclusion_type_index_type::const_iterator
-
-// {'getter': 'label', 'type': 'token'}
-//#define lookup_by_label_index_type std::unordered_multimap<token, rule>
-//#define lookup_by_label_index_iterator
-//lookup_by_label_index_type::const_iterator
-
-// {'getter': 'conditions', 'type': 'std::vector<judgment>', 'iterable': True}
-//#define lookup_by_condition_index_type
-//std::unordered_multimap<std::vector<judgment>, rule> #define
-//lookup_by_condition_index_iterator
-//lookup_by_condition_index_type::const_iterator
-
 struct Rule;
 
 struct rule {

@@ -11,16 +11,6 @@
 
 #include <list>
 
-// {'getter': 'via', 'type': 'rule'}
-//#define lookup_by_rule_index_type std::unordered_multimap<rule, application>
-//#define lookup_by_rule_index_iterator
-//lookup_by_rule_index_type::const_iterator
-
-// {'getter': 'result', 'type': 'judgment'}
-//#define lookup_by_result_index_type std::unordered_multimap<judgment,
-//application> #define lookup_by_result_index_iterator
-//lookup_by_result_index_type::const_iterator
-
 struct Application;
 
 struct application {
