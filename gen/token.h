@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hashutils.h"
+#include "hashutils.hpp"
 #include "prettyprint.hpp"
 #include <iostream>
 #include <unordered_map>

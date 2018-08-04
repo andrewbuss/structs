@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include <vector>
 #include <iostream>
-#include "hashutils.h"
+#include "hashutils.hpp"
 #include "prettyprint.hpp"
 
 {% for include in includes %}
