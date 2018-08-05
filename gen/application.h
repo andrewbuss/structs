@@ -9,7 +9,15 @@
 
 #include <rule.h>
 
+#include <judgment.h>
+
+#include <token.h>
+
 #include <list>
+
+#include <vector>
+
+#include <unordered_map>
 
 struct Application;
 
@@ -27,35 +35,44 @@ struct application {
 
 namespace std {
 template <> struct hash<application> {
-  size_t operator()(const application k) const { return hash<int>{}(k.i); }
+  size_t operator()(const application &k) const { return k.i; }
+};
+template <> struct hash<const application> {
+  size_t operator()(const application &k) const { return k.i; }
 };
 } // namespace std
 
 struct Application {
   // {'via': 'rule', 'condition_proofs': 'std::unordered_set<application>',
-  // 'result': 'judgment', 'args': 'std::vector<judgment>'}
+  // 'result': 'judgment', 'args': 'std::unordered_map<token,
+  // std::vector<judgment>>'}
   const rule via;
   const std::unordered_set<application> condition_proofs;
   const judgment result;
-  const std::vector<judgment> args;
+  const std::unordered_map<token, std::vector<judgment>> args;
   // {'body': '{ if(via) return 0; else return result; }', 'type': 'judgment'}
   judgment hypothesis_or_empty() const;
 
   Application()
       : via(rule()), condition_proofs(std::unordered_set<application>()),
-        result(judgment()), args(std::vector<judgment>()) {}
+        result(judgment()),
+        args(std::unordered_map<token, std::vector<judgment>>()) {}
 
   Application(const rule &via,
               const std::unordered_set<application> &condition_proofs,
-              const judgment &result, const std::vector<judgment> &args)
+              const judgment &result,
+              const std::unordered_map<token, std::vector<judgment>> &args)
       : via(via), condition_proofs(condition_proofs), result(result),
         args(args) {}
+
   static application
   create(const rule &via,
          const std::unordered_set<application> &condition_proofs,
-         const judgment &result, const std::vector<judgment> &args);
+         const judgment &result,
+         const std::unordered_map<token, std::vector<judgment>> &args);
 
   static application get_or_create(const judgment &x);
+  application save() const { return get_or_create(hypothesis_or_empty()); }
 
   Application(judgment j) : via(0), result(j) {}
 

@@ -9,7 +9,11 @@
 
 #include <judgment.h>
 
+#include <token.h>
+
 #include <set>
+
+#include <unordered_map>
 
 struct Rule;
 
@@ -27,47 +31,55 @@ struct rule {
 
 namespace std {
 template <> struct hash<rule> {
-  size_t operator()(const rule k) const { return hash<int>{}(k.i); }
+  size_t operator()(const rule &k) const { return k.i; }
+};
+template <> struct hash<const rule> {
+  size_t operator()(const rule &k) const { return k.i; }
 };
 } // namespace std
 
+struct application;
+
 struct Rule {
-  // {'conclusion': 'judgment', 'conditions': 'std::vector<judgment>', 'label':
-  // 'token'}
+  // {'arity': 'std::unordered_map<token, int>', 'conclusion': 'judgment',
+  // 'conditions': 'std::vector<judgment>', 'label': 'token'}
+  const std::unordered_map<token, int> arity;
   const judgment conclusion;
   const std::vector<judgment> conditions;
   const token label;
-  // {'body': '{ return {}; }', 'type': 'const std::multiset<token>'}
-  const std::multiset<token> signature()
-      const; // {'body': '{ return conclusion->type(); }', 'type': 'token'}
+  // {'body': '{ return conclusion->type(); }', 'type': 'token'}
   token conclusion_type() const;
 
   Rule()
-      : conclusion(judgment()), conditions(std::vector<judgment>()),
-        label(token()) {}
+      : arity(std::unordered_map<token, int>()), conclusion(judgment()),
+        conditions(std::vector<judgment>()), label(token()) {}
 
-  Rule(const judgment &conclusion, const std::vector<judgment> &conditions,
-       const token &label)
-      : conclusion(conclusion), conditions(conditions), label(label) {}
-  static rule create(const judgment &conclusion,
+  Rule(const std::unordered_map<token, int> &arity, const judgment &conclusion,
+       const std::vector<judgment> &conditions, const token &label)
+      : arity(arity), conclusion(conclusion), conditions(conditions),
+        label(label) {}
+
+  static rule create(const std::unordered_map<token, int> &arity,
+                     const judgment &conclusion,
                      const std::vector<judgment> &conditions,
                      const token &label);
 
-  using application = int;
+  rule save() const { return create(arity, conclusion, conditions, label); }
+
   application apply(rule, std::unordered_set<application> &);
 };
 
 struct RuleIndex {
 
-  // {'getter': 'signature()', 'type': 'std::multiset<token>'}
+  // {'getter': 'arity', 'type': 'std::unordered_map<token, int>'}
   using lookup_by_signature_index_type =
-      std::unordered_multimap<std::multiset<token>, rule>;
+      std::unordered_multimap<std::unordered_map<token, int>, rule>;
   static lookup_by_signature_index_type lookup_by_signature_index;
   using lookup_by_signature_index_iterator =
       lookup_by_signature_index_type::const_iterator;
   static std::pair<lookup_by_signature_index_iterator,
                    lookup_by_signature_index_iterator>
-  lookup_by_signature(const std::multiset<token> &x);
+  lookup_by_signature(const std::unordered_map<token, int> &x);
 
   // {'getter': 'conclusion', 'type': 'judgment'}
   using lookup_by_conclusion_index_type =

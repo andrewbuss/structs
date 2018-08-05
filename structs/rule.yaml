@@ -1,15 +1,17 @@
 name: Rule
 includes:
   - judgment.h
+  - token.h
   - set
+  - unordered_map
+forward_declared_structs:
+  - application
 members:
+  arity: std::unordered_map<token, int>
   conditions: std::vector<judgment>
   conclusion: judgment
   label: token
 properties:
-  signature:
-    type: const std::multiset<token>
-    body: "{ return {}; }"
   conclusion_type:
     type: token
     body: "{ return conclusion->type(); }"
@@ -18,8 +20,8 @@ lookups:
     getter: conclusion
     type: judgment
   lookup_by_signature:
-    getter: signature()
-    type: std::multiset<token>
+    getter: arity
+    type: std::unordered_map<token, int>
   lookup_by_conclusion_type:
     getter: conclusion_type()
     type: token
@@ -31,5 +33,4 @@ lookups:
     type: token
     getter: label
 extra:
-  using application = int;
   application apply(rule, std::unordered_set<application>&);

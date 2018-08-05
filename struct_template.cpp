@@ -40,7 +40,6 @@ std::unordered_map<{{ lookup_spec.type }}, {{ lname }}> {{ name }}Index::{{ look
 {% if unique_index %}
 {{ lname }} {{ name }}::get_or_create(const {{ lookups[unique_index].type }}& x) {
   auto {{ abbr }} = {{ name }}Index::{{ unique_index }}(x);
-  std::cout << {{ abbr }} << std::endl;
   if (!{{ abbr }}) return create(x);
   return {{ abbr }};
 }
@@ -81,7 +80,7 @@ std::pair<{{ name }}Index::{{ lookup }}_index_iterator,
   {%- endfor %}
   return {{ abbr }};
 }
-
+/*
 std::ostream& operator<<(std::ostream& os, const {{ name }}& {{ abbr }}) {
   os << "{{ name }}{";
   {% set comma = joiner(' ", " << ') -%}
@@ -90,7 +89,10 @@ std::ostream& operator<<(std::ostream& os, const {{ name }}& {{ abbr }}) {
   {%- endfor -%}
   return os << "}";
 }
+*/
 
+/*
 std::ostream& operator<<(std::ostream& os, const {{ lname }}& {{ abbr }}) {
   return os << {{ abbr }}.i;
 }
+*/

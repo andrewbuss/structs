@@ -32,11 +32,20 @@ struct {{ lname }} {
 
 namespace std {
   template <> struct hash<{{ lname }}> {
-    size_t operator()( const {{ lname }} k ) const {
-      return hash<int>{}(k.i);
+    size_t operator()(const {{ lname }}& k ) const {
+      return k.i;
+    }
+  };
+  template <> struct hash<const {{ lname }}> {
+    size_t operator()(const {{ lname }}& k ) const {
+      return k.i;
     }
   };
 }
+
+{% for s in forward_declared_structs %}
+struct {{ s }};
+{% endfor %}
 
 struct {{ name }} {
   // {{ members }}
@@ -66,6 +75,7 @@ struct {{ name }} {
     {{ comma() }}{{ member }}({{ member }})
   {%- endfor -%}
   {}
+
   static {{ lname }} create(
   {% set comma = joiner(", ") -%}
   {%- for member, type in members.items() -%}
@@ -74,6 +84,13 @@ struct {{ name }} {
 
   {% if unique_index %}
   static {{ lname }} get_or_create(const {{ lookups[unique_index].type }}& x);
+  {{ lname }} save() const {
+    return get_or_create({{ lookups[unique_index].getter }});
+  }
+  {% else %}
+  {{ lname }} save() const {
+    return create({{ all_members }});
+  }
   {%- endif %}
 
   {{ extra }}

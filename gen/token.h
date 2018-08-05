@@ -23,7 +23,10 @@ struct token {
 
 namespace std {
 template <> struct hash<token> {
-  size_t operator()(const token k) const { return hash<int>{}(k.i); }
+  size_t operator()(const token &k) const { return k.i; }
+};
+template <> struct hash<const token> {
+  size_t operator()(const token &k) const { return k.i; }
 };
 } // namespace std
 
@@ -34,9 +37,11 @@ struct Token {
   Token() : s(std::string()) {}
 
   Token(const std::string &s) : s(s) {}
+
   static token create(const std::string &s);
 
   static token get_or_create(const std::string &x);
+  token save() const { return get_or_create(s); }
 };
 
 struct TokenIndex {

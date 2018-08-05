@@ -35,7 +35,6 @@ judgment Judgment::create(const std::vector<token> &cs) {
 
 judgment Judgment::get_or_create(const std::vector<token> &x) {
   auto j = JudgmentIndex::lookup_by_cs(x);
-  std::cout << j << std::endl;
   if (!j)
     return create(x);
   return j;
@@ -73,13 +72,15 @@ judgment JudgmentIndex::index(const judgment j) {
     lookup_by_token_index.emplace(obj_cs, j);
   return j;
 }
-
-std::ostream &operator<<(std::ostream &os, const Judgment &j) {
+/*
+std::ostream& operator<<(std::ostream& os, const Judgment& j) {
   os << "Judgment{";
-  os << j.cs;
-  return os << "}";
+  os <<  j.cs;return os << "}";
 }
+*/
 
-std::ostream &operator<<(std::ostream &os, const judgment &j) {
+/*
+std::ostream& operator<<(std::ostream& os, const judgment& j) {
   return os << j.i;
 }
+*/

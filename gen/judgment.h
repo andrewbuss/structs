@@ -25,7 +25,10 @@ struct judgment {
 
 namespace std {
 template <> struct hash<judgment> {
-  size_t operator()(const judgment k) const { return hash<int>{}(k.i); }
+  size_t operator()(const judgment &k) const { return k.i; }
+};
+template <> struct hash<const judgment> {
+  size_t operator()(const judgment &k) const { return k.i; }
 };
 } // namespace std
 
@@ -39,9 +42,11 @@ struct Judgment {
   Judgment() : cs(std::vector<token>()) {}
 
   Judgment(const std::vector<token> &cs) : cs(cs) {}
+
   static judgment create(const std::vector<token> &cs);
 
   static judgment get_or_create(const std::vector<token> &x);
+  judgment save() const { return get_or_create(cs); }
 };
 
 struct JudgmentIndex {

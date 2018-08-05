@@ -1,10 +1,14 @@
 name: Application
 includes:
   - rule.h
+  - judgment.h
+  - token.h
   - list
+  - vector
+  - unordered_map
 members:
   via: rule
-  args: std::vector<judgment>
+  args: std::unordered_map<token, std::vector<judgment>>
   condition_proofs: std::unordered_set<application>
   result: judgment
 unique_index: lookup_by_hypothesis

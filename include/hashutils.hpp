@@ -102,12 +102,11 @@ struct hash<unordered_map<T...>>
     : hashutils::ContainerHash<unordered_map<T...>> {};
 
 template <typename... T>
-struct hash<multiset<T...>>
-    : hashutils::ContainerHash<multiset<T...>> {};
+struct hash<multiset<T...>> : hashutils::ContainerHash<multiset<T...>> {};
 
 template <typename K, typename V> struct hash<pair<K, V>> {
-  size_t operator()(pair<K, V> x) const {
-    return hash<K>(x.first) ^ hash<V>(x.second);
+  size_t operator()(const pair<K, V>& x) const {
+    return hash<K>()(x.first) ^ ~hash<V>()(x.second);
   }
 };
 

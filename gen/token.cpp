@@ -16,7 +16,6 @@ token Token::create(const std::string &s) {
 
 token Token::get_or_create(const std::string &x) {
   auto t = TokenIndex::lookup_by_s(x);
-  std::cout << t << std::endl;
   if (!t)
     return create(x);
   return t;
@@ -36,11 +35,15 @@ token TokenIndex::index(const token t) {
   lookup_by_s_index[obj_s] = t;
   return t;
 }
-
-std::ostream &operator<<(std::ostream &os, const Token &t) {
+/*
+std::ostream& operator<<(std::ostream& os, const Token& t) {
   os << "Token{";
-  os << t.s;
-  return os << "}";
+  os <<  t.s;return os << "}";
 }
+*/
 
-std::ostream &operator<<(std::ostream &os, const token &t) { return os << t.i; }
+/*
+std::ostream& operator<<(std::ostream& os, const token& t) {
+  return os << t.i;
+}
+*/
