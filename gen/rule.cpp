@@ -21,18 +21,17 @@ RuleIndex::lookup_by_conclusion_index_type
 RuleIndex::lookup_by_conclusion_type_index_type
     RuleIndex::lookup_by_conclusion_type_index;
 
-RuleIndex::lookup_by_label_index_type RuleIndex::lookup_by_label_index;
-
-RuleIndex::lookup_by_condition_index_type RuleIndex::lookup_by_condition_index;
+std::unordered_map<token, rule> RuleIndex::lookup_by_label_index;
 
 // {'body': '{ return conclusion->type(); }', 'type': 'token'}
 token Rule::conclusion_type() const {
   { return conclusion->type(); }
 }
 
-rule Rule::create(const std::unordered_map<token, int> &arity,
-                  const judgment &conclusion,
-                  const std::vector<judgment> &conditions, const token &label) {
+rule Rule::create(
+    const std::unordered_map<token, int> &arity, const judgment &conclusion,
+    const std::unordered_map<token, std::vector<judgment>> &conditions,
+    const token &label) {
   all_rules.push_back({arity, conclusion, conditions, label});
   rule r = {(int)all_rules.size() - 1};
   return RuleIndex::index(r);
@@ -59,18 +58,12 @@ RuleIndex::lookup_by_conclusion_type(const token &x) {
   return lookup_by_conclusion_type_index.equal_range(x);
 }
 
-// {'getter': 'label', 'type': 'token'}
-std::pair<RuleIndex::lookup_by_label_index_iterator,
-          RuleIndex::lookup_by_label_index_iterator>
-RuleIndex::lookup_by_label(const token &x) {
-  return lookup_by_label_index.equal_range(x);
-}
-
-// {'getter': 'conditions', 'type': 'std::vector<judgment>', 'iterable': True}
-std::pair<RuleIndex::lookup_by_condition_index_iterator,
-          RuleIndex::lookup_by_condition_index_iterator>
-RuleIndex::lookup_by_condition(const std::vector<judgment> &x) {
-  return lookup_by_condition_index.equal_range(x);
+// {'getter': 'label', 'unique': True, 'type': 'token'}
+rule RuleIndex::lookup_by_label(const token &x) {
+  auto it = lookup_by_label_index.find(x);
+  if (it == lookup_by_label_index.end())
+    return rule();
+  return it->second;
 }
 
 rule RuleIndex::index(const rule r) {
@@ -82,9 +75,7 @@ rule RuleIndex::index(const rule r) {
   const auto &obj_conclusion_type = obj.conclusion_type();
   lookup_by_conclusion_type_index.emplace(obj_conclusion_type, r);
   const auto &obj_label = obj.label;
-  lookup_by_label_index.emplace(obj_label, r);
-  for (const auto &obj_conditions : obj.conditions)
-    lookup_by_condition_index.emplace(obj_conditions, r);
+  lookup_by_label_index[obj_label] = r;
   return r;
 }
 /*

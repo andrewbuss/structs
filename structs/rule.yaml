@@ -8,7 +8,7 @@ forward_declared_structs:
   - application
 members:
   arity: std::unordered_map<token, int>
-  conditions: std::vector<judgment>
+  conditions: std::unordered_map<token, std::vector<judgment>>
   conclusion: judgment
   label: token
 properties:
@@ -25,12 +25,7 @@ lookups:
   lookup_by_conclusion_type:
     getter: conclusion_type()
     type: token
-  lookup_by_condition:
-    getter: conditions
-    type: std::vector<judgment>
-    iterable: true
   lookup_by_label:
     type: token
     getter: label
-extra:
-  application apply(rule, std::unordered_set<application>&);
+    unique: true

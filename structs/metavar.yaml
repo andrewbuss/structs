@@ -1,0 +1,27 @@
+name: Metavar
+includes:
+  - token.h
+members:
+  type: token
+  tok: token
+unique_index: lookup_by_tok
+lookups:
+  lookup_by_tok:
+    getter: tok
+    type: token
+    unique: true
+  lookup_by_type:
+    getter: type
+    type: token
+extra: >-
+  static token type_of_metavar_token(token t) {
+    auto pos = t->s.find('$');
+    return Token::get_or_create(t->s.substr(0, pos));
+  }
+
+  Metavar(token t)
+   : type(Metavar::type_of_metavar_token(t)), tok(t) { }
+
+  static metavar create(token t) {
+    return create(t, Metavar::type_of_metavar_token(t));
+  }

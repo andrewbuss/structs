@@ -1,0 +1,13 @@
+name: Shape
+members:
+
+  tok: tok
+unique_index: lookup_by_tok
+lookups:
+  lookup_by_tok:
+    getter: tok
+    type: token
+    unique: true
+  lookup_by_type:
+    getter: type
+    type: token

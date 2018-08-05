@@ -36,7 +36,7 @@ int main() {
   token x = Token::get_or_create("x");
   token y = Token::get_or_create("y");
   token equals = Token::get_or_create("=");
-  cout << TokenIndex::lookup_by_s_index << endl;
+  //  cout << TokenIndex::lookup_by_s_index << endl;
 
   judgment j1 = Judgment::get_or_create({wff, x});
   judgment j2 = Judgment::get_or_create({wff, y});

@@ -42,31 +42,33 @@ struct application;
 
 struct Rule {
   // {'arity': 'std::unordered_map<token, int>', 'conclusion': 'judgment',
-  // 'conditions': 'std::vector<judgment>', 'label': 'token'}
+  // 'conditions': 'std::unordered_map<token, std::vector<judgment>>', 'label':
+  // 'token'}
   const std::unordered_map<token, int> arity;
   const judgment conclusion;
-  const std::vector<judgment> conditions;
+  const std::unordered_map<token, std::vector<judgment>> conditions;
   const token label;
   // {'body': '{ return conclusion->type(); }', 'type': 'token'}
   token conclusion_type() const;
 
   Rule()
       : arity(std::unordered_map<token, int>()), conclusion(judgment()),
-        conditions(std::vector<judgment>()), label(token()) {}
+        conditions(std::unordered_map<token, std::vector<judgment>>()),
+        label(token()) {}
 
   Rule(const std::unordered_map<token, int> &arity, const judgment &conclusion,
-       const std::vector<judgment> &conditions, const token &label)
+       const std::unordered_map<token, std::vector<judgment>> &conditions,
+       const token &label)
       : arity(arity), conclusion(conclusion), conditions(conditions),
         label(label) {}
 
-  static rule create(const std::unordered_map<token, int> &arity,
-                     const judgment &conclusion,
-                     const std::vector<judgment> &conditions,
-                     const token &label);
+  static rule
+  create(const std::unordered_map<token, int> &arity,
+         const judgment &conclusion,
+         const std::unordered_map<token, std::vector<judgment>> &conditions,
+         const token &label);
 
   rule save() const { return create(arity, conclusion, conditions, label); }
-
-  application apply(rule, std::unordered_set<application> &);
 };
 
 struct RuleIndex {
@@ -101,24 +103,9 @@ struct RuleIndex {
                    lookup_by_conclusion_type_index_iterator>
   lookup_by_conclusion_type(const token &x);
 
-  // {'getter': 'label', 'type': 'token'}
-  using lookup_by_label_index_type = std::unordered_multimap<token, rule>;
-  static lookup_by_label_index_type lookup_by_label_index;
-  using lookup_by_label_index_iterator =
-      lookup_by_label_index_type::const_iterator;
-  static std::pair<lookup_by_label_index_iterator,
-                   lookup_by_label_index_iterator>
-  lookup_by_label(const token &x);
-
-  // {'getter': 'conditions', 'type': 'std::vector<judgment>', 'iterable': True}
-  using lookup_by_condition_index_type =
-      std::unordered_multimap<std::vector<judgment>, rule>;
-  static lookup_by_condition_index_type lookup_by_condition_index;
-  using lookup_by_condition_index_iterator =
-      lookup_by_condition_index_type::const_iterator;
-  static std::pair<lookup_by_condition_index_iterator,
-                   lookup_by_condition_index_iterator>
-  lookup_by_condition(const std::vector<judgment> &x);
+  // {'getter': 'label', 'unique': True, 'type': 'token'}
+  static std::unordered_map<token, rule> lookup_by_label_index;
+  static rule lookup_by_label(const token &x);
 
   static rule index(rule);
 };
