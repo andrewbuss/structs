@@ -1,6 +1,9 @@
+
+
 #pragma once
 
 #include "hashutils.hpp"
+#include "metavar_ptr.h"
 #include "prettyprint.hpp"
 #include <iostream>
 #include <unordered_map>
@@ -9,67 +12,46 @@
 
 #include <token.h>
 
-struct Metavar;
+#include <type_ptr.h>
 
-struct metavar {
-  int i;
-  const Metavar &operator*() const;
-  operator bool() const { return i != 0; }
-  metavar() : i(0) {}
-  metavar(int i) : i(i) {}
-  metavar operator=(const metavar &other) { return i = other.i; }
-  bool operator==(const metavar &other) const { return i == other.i; }
-  bool operator!=(const metavar &other) const { return i != other.i; }
-  const Metavar *operator->() const;
-};
-
-namespace std {
-template <> struct hash<metavar> {
-  size_t operator()(const metavar &k) const { return k.i; }
-};
-template <> struct hash<const metavar> {
-  size_t operator()(const metavar &k) const { return k.i; }
-};
-} // namespace std
+#include <cstdint>
 
 struct Metavar {
-  // {'tok': 'token', 'type': 'token'}
-  const token tok;
-  const token type;
+  const uint8_t i;
+  const type typ;
+  mutable token tok;
+  // {'body': '{ return std::make_pair(typ, i); }', 'type': 'std::pair<type,
+  // uint8_t>'}
+  std::pair<type, uint8_t> typ_i() const;
 
-  Metavar() : tok(token()), type(token()) {}
+  Metavar() : i(uint8_t()), typ(type()) {}
 
-  Metavar(const token &tok, const token &type) : tok(tok), type(type) {}
+  Metavar(const uint8_t &i, const type &typ) : i(i), typ(typ) {}
 
-  static metavar create(const token &tok, const token &type);
+  static metavar create(const uint8_t &i, const type &typ);
 
-  static metavar get_or_create(const token &x);
-  metavar save() const { return get_or_create(tok); }
+  static metavar get_or_create(const std::pair<type, uint8_t> &x);
+  static metavar get_if_exists(const std::pair<type, uint8_t> &x);
+  metavar save() const { return get_or_create(typ_i()); }
 
-  static token type_of_metavar_token(token t) {
-    auto pos = t->s.find('$');
-    return Token::get_or_create(t->s.substr(0, pos));
-  }
-  Metavar(token t) : type(Metavar::type_of_metavar_token(t)), tok(t) {}
-
-  static metavar create(token t) {
-    return create(t, Metavar::type_of_metavar_token(t));
+  inline static metavar create(const std::pair<type, uint8_t> typ_i) {
+    return Metavar::create(typ_i.first, typ_i.second);
   }
 };
 
 struct MetavarIndex {
 
-  // {'getter': 'tok', 'unique': True, 'type': 'token'}
-  static std::unordered_map<token, metavar> lookup_by_tok_index;
-  static metavar lookup_by_tok(const token &x);
+  // {'getter': 'typ', 'type': 'type'}
+  using lookup_by_typ_index_type = std::unordered_multimap<type, metavar>;
+  static lookup_by_typ_index_type lookup_by_typ_index;
+  using lookup_by_typ_index_iterator = lookup_by_typ_index_type::const_iterator;
+  static std::pair<lookup_by_typ_index_iterator, lookup_by_typ_index_iterator>
+  lookup_by_typ(const type &x);
 
-  // {'getter': 'type', 'type': 'token'}
-  using lookup_by_type_index_type = std::unordered_multimap<token, metavar>;
-  static lookup_by_type_index_type lookup_by_type_index;
-  using lookup_by_type_index_iterator =
-      lookup_by_type_index_type::const_iterator;
-  static std::pair<lookup_by_type_index_iterator, lookup_by_type_index_iterator>
-  lookup_by_type(const token &x);
+  // {'getter': 'typ_i()', 'unique': True, 'type': 'std::pair<type, uint8_t>'}
+  static std::unordered_map<std::pair<type, uint8_t>, metavar>
+      lookup_by_typ_i_index;
+  static metavar lookup_by_typ_i(const std::pair<type, uint8_t> &x);
 
   static metavar index(metavar);
   static std::vector<Metavar> all_Metavars;

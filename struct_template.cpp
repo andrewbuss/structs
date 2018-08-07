@@ -4,7 +4,7 @@
 {%- set all_members = ', '.join(members.keys()) %}
 
 #include <{{ lname }}.h>
-{%- for include in includes %}
+{%- for include in (cpp_includes or []) %}
 #include <{{ include }}>
 {% endfor %}
 
@@ -33,7 +33,8 @@ std::unordered_map<{{ lookup_spec.type }}, {{ lname }}> {{ name }}Index::{{ look
   {{ comma() }}const {{ type }}& {{ member }}
   {%- endfor -%}) {
   {{ name }}Index::all_{{ name }}s.push_back({ {{ all_members }} });
-  {{ lname }} {{ abbr }} = {(int){{ name }}Index::all_{{ name }}s.size() - 1};
+  {{ lname }} {{ abbr }}{(int){{ name }}Index::all_{{ name }}s.size() - 1};
+  {{ post_create }}
   return {{ name }}Index::index({{ abbr }});
 }
 
@@ -41,6 +42,12 @@ std::unordered_map<{{ lookup_spec.type }}, {{ lname }}> {{ name }}Index::{{ look
 {{ lname }} {{ name }}::get_or_create(const {{ lookups[unique_index].type }}& x) {
   auto {{ abbr }} = {{ name }}Index::{{ unique_index }}(x);
   if (!{{ abbr }}) return create(x);
+  return {{ abbr }};
+}
+
+{{ lname }} {{ name }}::get_if_exists(const {{ lookups[unique_index].type }}& x) {
+  auto {{ abbr }} = {{ name }}Index::{{ unique_index }}(x);
+  if (!{{ abbr }}) return {{ lname }}{0};
   return {{ abbr }};
 }
 {%- endif %}
@@ -66,7 +73,7 @@ std::pair<{{ name }}Index::{{ lookup }}_index_iterator,
 {{ lname }} {{ name }}Index::index(const {{ lname }} {{ abbr }}) {
   const auto& obj = *{{ abbr }};
   {%- for lookup, lookup_spec in (lookups or {}).items() -%}
-  {%- set prop_var = 'obj_' + lookup_spec.getter.strip('()') -%}
+  {%- set prop_var = 'obj_' + sanitize(lookup_spec.getter) -%}
   {% if lookup_spec.iterable %}
   for(const auto& {{ prop_var }} : obj.{{ lookup_spec.getter }})
     {% else %}

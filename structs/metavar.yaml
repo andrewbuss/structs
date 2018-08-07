@@ -1,27 +1,29 @@
 name: Metavar
 includes:
   - token.h
+  - type_ptr.h
+  - cstdint
+cpp_includes:
+  - type.h
 members:
-  type: token
+  typ: type
+  i: uint8_t
+back_edges:
   tok: token
-unique_index: lookup_by_tok
+properties:
+  typ_i:
+    type: std::pair<type, uint8_t>
+    body: "{ return std::make_pair(typ, i); }"
+unique_index: lookup_by_typ_i
 lookups:
-  lookup_by_tok:
-    getter: tok
-    type: token
+  lookup_by_typ:
+    getter: typ
+    type: type
+  lookup_by_typ_i:
+    getter: typ_i()
+    type: std::pair<type, uint8_t>
     unique: true
-  lookup_by_type:
-    getter: type
-    type: token
 extra: >-
-  static token type_of_metavar_token(token t) {
-    auto pos = t->s.find('$');
-    return Token::get_or_create(t->s.substr(0, pos));
-  }
-
-  Metavar(token t)
-   : type(Metavar::type_of_metavar_token(t)), tok(t) { }
-
-  static metavar create(token t) {
-    return create(t, Metavar::type_of_metavar_token(t));
+  inline static metavar create(const std::pair<type, uint8_t> typ_i) {
+    return Metavar::create(typ_i.first, typ_i.second);
   }

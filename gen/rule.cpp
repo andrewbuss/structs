@@ -1,13 +1,6 @@
 
 
-#include <judgment.h>
 #include <rule.h>
-
-#include <token.h>
-
-#include <set>
-
-#include <unordered_map>
 
 std::vector<Rule> RuleIndex::all_Rules{{}};
 const Rule *rule::operator->() const { return RuleIndex::all_Rules.data() + i; }
@@ -23,24 +16,20 @@ RuleIndex::lookup_by_conclusion_type_index_type
 
 std::unordered_map<token, rule> RuleIndex::lookup_by_label_index;
 
-// {'body': '{ return conclusion->type(); }', 'type': 'token'}
-token Rule::conclusion_type() const {
-  { return conclusion->type(); }
-}
-
 rule Rule::create(
-    const std::unordered_map<token, int> &arity, const judgment &conclusion,
+    const arity_t &arity, const judgment &conclusion,
     const std::unordered_map<token, std::vector<judgment>> &conditions,
     const token &label) {
   RuleIndex::all_Rules.push_back({arity, conclusion, conditions, label});
-  rule r = {(int)RuleIndex::all_Rules.size() - 1};
+  rule r{(int)RuleIndex::all_Rules.size() - 1};
+
   return RuleIndex::index(r);
 }
 
-// {'getter': 'arity', 'type': 'std::unordered_map<token, int>'}
+// {'getter': 'arity', 'type': 'arity_t'}
 std::pair<RuleIndex::lookup_by_signature_index_iterator,
           RuleIndex::lookup_by_signature_index_iterator>
-RuleIndex::lookup_by_signature(const std::unordered_map<token, int> &x) {
+RuleIndex::lookup_by_signature(const arity_t &x) {
   return lookup_by_signature_index.equal_range(x);
 }
 
@@ -51,7 +40,7 @@ RuleIndex::lookup_by_conclusion(const judgment &x) {
   return lookup_by_conclusion_index.equal_range(x);
 }
 
-// {'getter': 'conclusion_type()', 'type': 'token'}
+// {'getter': 'conclusion->shp->typ()', 'type': 'token'}
 std::pair<RuleIndex::lookup_by_conclusion_type_index_iterator,
           RuleIndex::lookup_by_conclusion_type_index_iterator>
 RuleIndex::lookup_by_conclusion_type(const token &x) {
@@ -72,8 +61,8 @@ rule RuleIndex::index(const rule r) {
   lookup_by_signature_index.emplace(obj_arity, r);
   const auto &obj_conclusion = obj.conclusion;
   lookup_by_conclusion_index.emplace(obj_conclusion, r);
-  const auto &obj_conclusion_type = obj.conclusion_type();
-  lookup_by_conclusion_type_index.emplace(obj_conclusion_type, r);
+  const auto &obj_conclusion__shp__typ = obj.conclusion->shp->typ();
+  lookup_by_conclusion_type_index.emplace(obj_conclusion__shp__typ, r);
   const auto &obj_label = obj.label;
   lookup_by_label_index[obj_label] = r;
   return r;

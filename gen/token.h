@@ -1,38 +1,25 @@
+
+
 #pragma once
 
 #include "hashutils.hpp"
 #include "prettyprint.hpp"
+#include "token_ptr.h"
 #include <iostream>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
-struct Token;
+#include <vector>
 
-struct token {
-  int i;
-  const Token &operator*() const;
-  operator bool() const { return i != 0; }
-  token() : i(0) {}
-  token(int i) : i(i) {}
-  token operator=(const token &other) { return i = other.i; }
-  bool operator==(const token &other) const { return i == other.i; }
-  bool operator!=(const token &other) const { return i != other.i; }
-  const Token *operator->() const;
-};
+#include <metavar_ptr.h>
 
-namespace std {
-template <> struct hash<token> {
-  size_t operator()(const token &k) const { return k.i; }
-};
-template <> struct hash<const token> {
-  size_t operator()(const token &k) const { return k.i; }
-};
-} // namespace std
+#include <type.h>
 
 struct Token {
-  // {'s': 'std::string'}
   const std::string s;
+  mutable metavar mv;
+  mutable type typ;
 
   Token() : s(std::string()) {}
 
@@ -41,6 +28,7 @@ struct Token {
   static token create(const std::string &s);
 
   static token get_or_create(const std::string &x);
+  static token get_if_exists(const std::string &x);
   token save() const { return get_or_create(s); }
 };
 

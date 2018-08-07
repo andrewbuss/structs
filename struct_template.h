@@ -1,3 +1,8 @@
+{%- set lname = name.lower() %}
+{%- set plural = lname + 's' %}
+{%- set abbr = lname[0] %}
+{%- set all_members = ', '.join(members.keys()) %}
+
 #pragma once
 
 #include <unordered_map>
@@ -6,51 +11,27 @@
 #include <iostream>
 #include "hashutils.hpp"
 #include "prettyprint.hpp"
-
+#include "{{ lname }}_ptr.h"
 {% for include in includes %}
 #include <{{ include }}>
 {% endfor %}
 
-{%- set lname = name.lower() %}
-{%- set plural = lname + 's' %}
-{%- set abbr = lname[0] %}
-{%- set all_members = ', '.join(members.keys()) %}
+{% for name, val in (usings or {}).iteritems() %}
+using {{ name }} = {{ val }};
+{% endfor %}
 
-struct {{ name }};
-
-struct {{ lname }} {
-  int i;
-  const {{ name }}& operator*() const;
-  operator bool() const { return i != 0; }
-  {{ lname }} () : i(0) {}
-  {{ lname }} (int i) : i(i) {}
-  {{ lname }} operator=(const {{ lname }}& other) { return i = other.i; }
-  bool operator==(const {{ lname }}& other) const { return i == other.i; }
-  bool operator!=(const {{ lname }}& other) const { return i != other.i; }
-  const {{ name }}* operator->() const;
-};
-
-namespace std {
-  template <> struct hash<{{ lname }}> {
-    size_t operator()(const {{ lname }}& k ) const {
-      return k.i;
-    }
-  };
-  template <> struct hash<const {{ lname }}> {
-    size_t operator()(const {{ lname }}& k ) const {
-      return k.i;
-    }
-  };
-}
 
 {% for s in forward_declared_structs %}
 struct {{ s }};
 {% endfor %}
 
 struct {{ name }} {
-  // {{ members }}
   {% for member, type in members.items() -%}
   const {{ type }} {{ member }};
+  {% endfor -%}
+
+  {% for name, type in (back_edges or {}).items() -%}
+  mutable {{ type }} {{ name }};
   {% endfor -%}
 
   {% for property, prop_spec in (properties or {}).items() -%}
@@ -84,6 +65,7 @@ struct {{ name }} {
 
   {% if unique_index %}
   static {{ lname }} get_or_create(const {{ lookups[unique_index].type }}& x);
+  static {{ lname }} get_if_exists(const {{ lookups[unique_index].type }}& x);
   {{ lname }} save() const {
     return get_or_create({{ lookups[unique_index].getter }});
   }

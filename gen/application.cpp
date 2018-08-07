@@ -1,17 +1,6 @@
 
 
 #include <application.h>
-#include <rule.h>
-
-#include <judgment.h>
-
-#include <token.h>
-
-#include <list>
-
-#include <vector>
-
-#include <unordered_map>
 
 std::vector<Application> ApplicationIndex::all_Applications{{}};
 const Application *application::operator->() const {
@@ -38,15 +27,32 @@ judgment Application::hypothesis_or_empty() const {
     else
       return result;
   }
+} // {'body': '{\n  std::unordered_set<judgment> rv;\n  for(const auto& [typ,
+  // conditions_of_type]: conditions) {\n    for(const auto& c:
+  // conditions_of_type) {\n      if(!c->via && c->conditions.size() == 0)
+  // continue;\n      const auto& c_assumptions = c->assumptions();\n
+  // rv.insert(c_assumptions.begin(), c_assumptions.end());\n    }\n  }\n return
+  // rv;\n}', 'type': 'std::unordered_set<judgment>'}
+std::unordered_set<judgment> Application::assumptions() const {
+  {
+    std::unordered_set<judgment> rv;
+    for (const auto &[typ, conditions_of_type] : conditions) {
+      for (const auto &c : conditions_of_type) {
+        if (!c->via && c->conditions.size() == 0)
+          continue;
+        const auto &c_assumptions = c->assumptions();
+        rv.insert(c_assumptions.begin(), c_assumptions.end());
+      }
+    }
+    return rv;
+  }
 }
 
-application Application::create(
-    const rule &via,
-    const std::unordered_map<token, std::vector<application>> &conditions,
-    const judgment &result,
-    const std::unordered_map<token, std::vector<application>> &args) {
+application Application::create(const rule &via, const stack &conditions,
+                                const judgment &result, const stack &args) {
   ApplicationIndex::all_Applications.push_back({via, conditions, result, args});
-  application a = {(int)ApplicationIndex::all_Applications.size() - 1};
+  application a{(int)ApplicationIndex::all_Applications.size() - 1};
+
   return ApplicationIndex::index(a);
 }
 
@@ -54,6 +60,13 @@ application Application::get_or_create(const judgment &x) {
   auto a = ApplicationIndex::lookup_by_hypothesis(x);
   if (!a)
     return create(x);
+  return a;
+}
+
+application Application::get_if_exists(const judgment &x) {
+  auto a = ApplicationIndex::lookup_by_hypothesis(x);
+  if (!a)
+    return application{0};
   return a;
 }
 

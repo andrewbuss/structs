@@ -8,51 +8,81 @@ const Shape *shape::operator->() const {
 }
 const Shape &shape::operator*() const { return ShapeIndex::all_Shapes[i]; }
 
-std::unordered_map<token, shape> ShapeIndex::lookup_by_tok_index;
-
 ShapeIndex::lookup_by_type_index_type ShapeIndex::lookup_by_type_index;
 
-shape Shape::create(const tok &tok) {
-  ShapeIndex::all_Shapes.push_back({tok});
-  shape s = {(int)ShapeIndex::all_Shapes.size() - 1};
+std::unordered_map<std::vector<token>, shape> ShapeIndex::lookup_by_cs_index;
+
+ShapeIndex::lookup_by_token_index_type ShapeIndex::lookup_by_token_index;
+
+// {'body': '{\n  if(cs.size() == 0) return type();\n  assert(cs[0]->mv);\n
+// return cs[0]->mv->typ;\n}', 'type': 'type'}
+type Shape::typ() const {
+  {
+    if (cs.size() == 0)
+      return type();
+    assert(cs[0]->mv);
+    return cs[0]->mv->typ;
+  }
+}
+
+shape Shape::create(const std::vector<token> &cs) {
+  ShapeIndex::all_Shapes.push_back({cs});
+  shape s{(int)ShapeIndex::all_Shapes.size() - 1};
+
   return ShapeIndex::index(s);
 }
 
-shape Shape::get_or_create(const token &x) {
-  auto s = ShapeIndex::lookup_by_tok(x);
+shape Shape::get_or_create(const std::vector<token> &x) {
+  auto s = ShapeIndex::lookup_by_cs(x);
   if (!s)
     return create(x);
   return s;
 }
 
-// {'getter': 'tok', 'unique': True, 'type': 'token'}
-shape ShapeIndex::lookup_by_tok(const token &x) {
-  auto it = lookup_by_tok_index.find(x);
-  if (it == lookup_by_tok_index.end())
+shape Shape::get_if_exists(const std::vector<token> &x) {
+  auto s = ShapeIndex::lookup_by_cs(x);
+  if (!s)
+    return shape{0};
+  return s;
+}
+
+// {'getter': 'typ()', 'type': 'type'}
+std::pair<ShapeIndex::lookup_by_type_index_iterator,
+          ShapeIndex::lookup_by_type_index_iterator>
+ShapeIndex::lookup_by_type(const type &x) {
+  return lookup_by_type_index.equal_range(x);
+}
+
+// {'getter': 'cs', 'unique': True, 'type': 'std::vector<token>'}
+shape ShapeIndex::lookup_by_cs(const std::vector<token> &x) {
+  auto it = lookup_by_cs_index.find(x);
+  if (it == lookup_by_cs_index.end())
     return shape();
   return it->second;
 }
 
-// {'getter': 'type', 'type': 'token'}
-std::pair<ShapeIndex::lookup_by_type_index_iterator,
-          ShapeIndex::lookup_by_type_index_iterator>
-ShapeIndex::lookup_by_type(const token &x) {
-  return lookup_by_type_index.equal_range(x);
+// {'getter': 'cs', 'type': 'token', 'iterable': True}
+std::pair<ShapeIndex::lookup_by_token_index_iterator,
+          ShapeIndex::lookup_by_token_index_iterator>
+ShapeIndex::lookup_by_token(const token &x) {
+  return lookup_by_token_index.equal_range(x);
 }
 
 shape ShapeIndex::index(const shape s) {
   const auto &obj = *s;
-  const auto &obj_tok = obj.tok;
-  lookup_by_tok_index[obj_tok] = s;
-  const auto &obj_type = obj.type;
-  lookup_by_type_index.emplace(obj_type, s);
+  const auto &obj_typ = obj.typ();
+  lookup_by_type_index.emplace(obj_typ, s);
+  const auto &obj_cs = obj.cs;
+  lookup_by_cs_index[obj_cs] = s;
+  for (const auto &obj_cs : obj.cs)
+    lookup_by_token_index.emplace(obj_cs, s);
   return s;
 }
 
 /*
 std::ostream& operator<<(std::ostream& os, const Shape& s) {
   os << "Shape{";
-  os <<  s.tok;return os << "}";
+  os <<  s.cs;return os << "}";
 }
 */
 

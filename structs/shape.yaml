@@ -1,13 +1,30 @@
 name: Shape
+includes:
+  - token.h
+  - vector
+  - cassert
+  - metavar.h
 members:
-
-  tok: tok
-unique_index: lookup_by_tok
+  cs: std::vector<token>
+properties:
+  typ:
+    type: type
+    body: >-
+      {
+        if(cs.size() == 0) return type();
+        assert(cs[0]->mv);
+        return cs[0]->mv->typ;
+      }
+unique_index: lookup_by_cs
 lookups:
-  lookup_by_tok:
-    getter: tok
-    type: token
+  lookup_by_cs:
+    getter: cs
+    type: std::vector<token>
     unique: true
   lookup_by_type:
-    getter: type
+    getter: typ()
+    type: type
+  lookup_by_token:
+    getter: cs
     type: token
+    iterable: true

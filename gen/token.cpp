@@ -12,7 +12,19 @@ std::unordered_map<std::string, token> TokenIndex::lookup_by_s_index;
 
 token Token::create(const std::string &s) {
   TokenIndex::all_Tokens.push_back({s});
-  token t = {(int)TokenIndex::all_Tokens.size() - 1};
+  token t{(int)TokenIndex::all_Tokens.size() - 1};
+  auto pos = t->s.find('$');
+  if (pos != std::string::npos) {
+    token typ_token = TokenIndex::lookup_by_s(t->s.substr(0, pos));
+    type typ = Type::get_or_create(typ_token);
+    for (int i = 0; i < 16; i++) {
+      metavar mv = Metavar::create(typ, i);
+      typ->mvs.push_back(mv);
+      mv->tok = t;
+    }
+    uint8_t i = std::stoi(t->s.substr(0, t->s.size() - pos - 1));
+    t->mv = MetavarIndex::lookup_by_typ_i(std::make_pair(typ, i));
+  }
   return TokenIndex::index(t);
 }
 
@@ -20,6 +32,13 @@ token Token::get_or_create(const std::string &x) {
   auto t = TokenIndex::lookup_by_s(x);
   if (!t)
     return create(x);
+  return t;
+}
+
+token Token::get_if_exists(const std::string &x) {
+  auto t = TokenIndex::lookup_by_s(x);
+  if (!t)
+    return token{0};
   return t;
 }
 

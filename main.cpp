@@ -38,18 +38,18 @@ int main() {
   token equals = Token::get_or_create("=");
   //  cout << TokenIndex::lookup_by_s_index << endl;
 
-  judgment j1 = Judgment::get_or_create({wff, x});
-  judgment j2 = Judgment::get_or_create({wff, y});
-  judgment j3 = Judgment::get_or_create({wff, x});
-  judgment j4 = Judgment::get_or_create({turnstile, x});
-  judgment j5 = Judgment::get_or_create({turnstile, x, equals, y});
+  judgment j1 = Judgment::get_or_create(vector<string>{"wff", "x"});
+  judgment j2 = Judgment::get_or_create(vector<token>{wff, y});
+  judgment j3 = Judgment::get_or_create(vector<token>{wff, x});
+  judgment j4 = Judgment::get_or_create(vector<token>{turnstile, x});
+  judgment j5 = Judgment::get_or_create(vector<token>{turnstile, x, equals, y});
 
   cout << JudgmentIndex::lookup_by_type_index << endl;
-  cout << "wff: " << range_to_vec<judgment>(JudgmentIndex::lookup_by_type(wff))
+  cout << "wff: " << range_to_vec<judgment>(JudgmentIndex::lookup_by_type(wff->typ))
        << endl;
-  cout << "|-: " << range_to_vec<judgment>(JudgmentIndex::lookup_by_type(turnstile))
+  cout << "|-: " << range_to_vec<judgment>(JudgmentIndex::lookup_by_type(turnstile->typ))
        << endl;
-  cout << "x: " << range_to_vec<judgment>(JudgmentIndex::lookup_by_token(x))
+  cout << "x: " << range_to_vec<shape>(ShapeIndex::lookup_by_token(x))
        << endl;
 
 }

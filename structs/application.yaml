@@ -6,10 +6,13 @@ includes:
   - list
   - vector
   - unordered_map
+  - unordered_set
+usings:
+  stack: std::unordered_map<type, std::vector<application>>
 members:
   via: rule
-  args: std::unordered_map<token, std::vector<application>>
-  conditions: std::unordered_map<token, std::vector<application>>
+  args: stack
+  conditions: stack
   result: judgment
 unique_index: lookup_by_hypothesis
 properties:
@@ -17,6 +20,20 @@ properties:
     type: judgment
     body: "{ if(via) return 0;
              else return result; }"
+  assumptions:
+    type: std::unordered_set<judgment>
+    body: >-
+      {
+        std::unordered_set<judgment> rv;
+        for(const auto& [typ, conditions_of_type]: conditions) {
+          for(const auto& c: conditions_of_type) {
+            if(!c->via && c->conditions.size() == 0) continue;
+            const auto& c_assumptions = c->assumptions();
+            rv.insert(c_assumptions.begin(), c_assumptions.end());
+          }
+        }
+        return rv;
+      }
 lookups:
   lookup_by_rule:
     type: rule
@@ -38,15 +55,4 @@ extra: >-
   }
   static application create(judgment j) {
     return create(rule(), {}, j, {});
-  }
-  std::unordered_set<judgment> assumptions() const {
-    std::unordered_set<judgment> rv;
-    for(const auto& [type, conditions_of_type]: conditions) {
-      for(const auto& c: conditions_of_type) {
-        if(!c->via && c->conditions.size() == 0) continue;
-        const auto& c_assumptions = c.assumptions();
-        rv.insert(c_assumptions.begin(); c_assumptions.end());
-      }
-    }
-    return rv;
   }

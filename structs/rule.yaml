@@ -4,26 +4,24 @@ includes:
   - token.h
   - set
   - unordered_map
+usings:
+  arity_t: std::unordered_map<token, int>
 forward_declared_structs:
   - application
 members:
-  arity: std::unordered_map<token, int>
+  arity: arity_t
   conditions: std::unordered_map<token, std::vector<judgment>>
   conclusion: judgment
   label: token
-properties:
-  conclusion_type:
-    type: token
-    body: "{ return conclusion->type(); }"
 lookups:
   lookup_by_conclusion:
     getter: conclusion
     type: judgment
   lookup_by_signature:
     getter: arity
-    type: std::unordered_map<token, int>
+    type: arity_t
   lookup_by_conclusion_type:
-    getter: conclusion_type()
+    getter: conclusion->shp->typ()
     type: token
   lookup_by_label:
     type: token

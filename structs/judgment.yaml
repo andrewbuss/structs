@@ -1,38 +1,74 @@
 name: Judgment
 includes:
   - token.h
+  - type.h
+  - constant.h
+  - shape.h
+  - metavar.h
+usings:
+  naming: std::vector<uint8_t>
+  shape_naming: std::pair<shape, naming>
 members:
-  cs: std::vector<token>
-  s: shape
-  n: naming
+  shp: shape
+  nam: naming
 properties:
-  type:
-    type: token
-    body: "{ if(cs.size() > 0) return cs[0]; else return token(); }"
-unique_index: lookup_by_cs
+  shp_nam:
+    type: shape_naming
+    body: "{ return std::make_pair(shp, nam); }"
+  cs:
+    type: std::vector<token>
+    body: >-
+      {
+        std::vector<token> cs(shp->cs);
+        int x = 0;
+        for(auto& s : cs) {
+          if(s->typ) {
+            uint8_t i = nam[x++];
+            s = s->typ->mvs[i]->tok;
+          }
+        }
+        return cs;
+      }
+unique_index: lookup_by_shp_nam
 lookups:
   lookup_by_shape:
     type: shape
-    getter: s
+    getter: shp
   lookup_by_naming:
     type: naming
-    getter: n
+    getter: nam
+  lookup_by_shp_nam:
+    type: shape_naming
+    getter: shp_nam()
+    unique: true
   lookup_by_cs:
     type: std::vector<token>
-    getter: cs
+    getter: cs()
     unique: true
   lookup_by_type:
-    type: token
-    getter: type()
-  lookup_by_token:
-    type: token
-    getter: cs
-    iterable: true
+    type: type
+    getter: shp->typ()
 extra: >-
-  judgment get_or_create(std::vector<std::string> ss) {
-    std::vector<token> ts;
+  static judgment get_or_create(const std::vector<std::string>& ss) {
+    std::vector<token> toks;
     for(const auto& s: ss) {
-      ts.push_back(Token::get_or_create(s));
+      toks.push_back(Token::get_or_create(s));
     }
-    return get_or_create(ts);
+    return get_or_create(toks);
+  }
+
+  static judgment get_or_create(const std::vector<token>& ts) {
+    std::vector<token> shp(ts);
+    naming nam;
+    for(auto& t : shp) {
+      if(t->mv) {
+        t = t->mv->typ->tok;
+        nam.push_back(t->mv->i);
+      }
+    }
+    return get_or_create(std::make_pair(Shape::get_or_create(shp), nam));
+  }
+
+  inline static judgment create(const shape_naming& shp_nam) {
+    return create(shp_nam.first, shp_nam.second);
   }

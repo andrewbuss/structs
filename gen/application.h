@@ -1,5 +1,8 @@
+
+
 #pragma once
 
+#include "application_ptr.h"
 #include "hashutils.hpp"
 #include "prettyprint.hpp"
 #include <iostream>
@@ -19,60 +22,38 @@
 
 #include <unordered_map>
 
-struct Application;
+#include <unordered_set>
 
-struct application {
-  int i;
-  const Application &operator*() const;
-  operator bool() const { return i != 0; }
-  application() : i(0) {}
-  application(int i) : i(i) {}
-  application operator=(const application &other) { return i = other.i; }
-  bool operator==(const application &other) const { return i == other.i; }
-  bool operator!=(const application &other) const { return i != other.i; }
-  const Application *operator->() const;
-};
-
-namespace std {
-template <> struct hash<application> {
-  size_t operator()(const application &k) const { return k.i; }
-};
-template <> struct hash<const application> {
-  size_t operator()(const application &k) const { return k.i; }
-};
-} // namespace std
+using stack = std::unordered_map<type, std::vector<application>>;
 
 struct Application {
-  // {'via': 'rule', 'conditions': 'std::unordered_map<token,
-  // std::vector<application>>', 'result': 'judgment', 'args':
-  // 'std::unordered_map<token, std::vector<application>>'}
   const rule via;
-  const std::unordered_map<token, std::vector<application>> conditions;
+  const stack conditions;
   const judgment result;
-  const std::unordered_map<token, std::vector<application>> args;
+  const stack args;
   // {'body': '{ if(via) return 0; else return result; }', 'type': 'judgment'}
-  judgment hypothesis_or_empty() const;
+  judgment hypothesis_or_empty()
+      const; // {'body': '{\n  std::unordered_set<judgment> rv;\n  for(const
+             // auto& [typ, conditions_of_type]: conditions) {\n    for(const
+             // auto& c: conditions_of_type) {\n      if(!c->via &&
+             // c->conditions.size() == 0) continue;\n      const auto&
+             // c_assumptions = c->assumptions();\n
+             // rv.insert(c_assumptions.begin(), c_assumptions.end());\n    }\n
+             // }\n  return rv;\n}', 'type': 'std::unordered_set<judgment>'}
+  std::unordered_set<judgment> assumptions() const;
 
   Application()
-      : via(rule()),
-        conditions(std::unordered_map<token, std::vector<application>>()),
-        result(judgment()),
-        args(std::unordered_map<token, std::vector<application>>()) {}
+      : via(rule()), conditions(stack()), result(judgment()), args(stack()) {}
 
-  Application(
-      const rule &via,
-      const std::unordered_map<token, std::vector<application>> &conditions,
-      const judgment &result,
-      const std::unordered_map<token, std::vector<application>> &args)
+  Application(const rule &via, const stack &conditions, const judgment &result,
+              const stack &args)
       : via(via), conditions(conditions), result(result), args(args) {}
 
-  static application
-  create(const rule &via,
-         const std::unordered_map<token, std::vector<application>> &conditions,
-         const judgment &result,
-         const std::unordered_map<token, std::vector<application>> &args);
+  static application create(const rule &via, const stack &conditions,
+                            const judgment &result, const stack &args);
 
   static application get_or_create(const judgment &x);
+  static application get_if_exists(const judgment &x);
   application save() const { return get_or_create(hypothesis_or_empty()); }
 
   Application(judgment j) : via(0), result(j) {}
@@ -81,18 +62,6 @@ struct Application {
     return get_or_create(j);
   }
   static application create(judgment j) { return create(rule(), {}, j, {}); }
-  std::unordered_set<judgment> assumptions() const {
-    std::unordered_set<judgment> rv;
-    for (const auto &[type, conditions_of_type] : conditions) {
-      for (const auto &c : conditions_of_type) {
-        if (!c->via && c->conditions.size() == 0)
-          continue;
-        const auto &c_assumptions = c.assumptions();
-        rv.insert(c_assumptions.begin(); c_assumptions.end());
-      }
-    }
-    return rv;
-  }
 };
 
 struct ApplicationIndex {

@@ -1,62 +1,62 @@
+
+
 #pragma once
 
 #include "hashutils.hpp"
 #include "prettyprint.hpp"
+#include "shape_ptr.h"
 #include <iostream>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
-struct Shape;
+#include <token.h>
 
-struct shape {
-  int i;
-  const Shape &operator*() const;
-  operator bool() const { return i != 0; }
-  shape() : i(0) {}
-  shape(int i) : i(i) {}
-  shape operator=(const shape &other) { return i = other.i; }
-  bool operator==(const shape &other) const { return i == other.i; }
-  bool operator!=(const shape &other) const { return i != other.i; }
-  const Shape *operator->() const;
-};
+#include <vector>
 
-namespace std {
-template <> struct hash<shape> {
-  size_t operator()(const shape &k) const { return k.i; }
-};
-template <> struct hash<const shape> {
-  size_t operator()(const shape &k) const { return k.i; }
-};
-} // namespace std
+#include <cassert>
+
+#include <metavar.h>
 
 struct Shape {
-  // {'tok': 'tok'}
-  const tok tok;
+  const std::vector<token> cs;
+  // {'body': '{\n  if(cs.size() == 0) return type();\n  assert(cs[0]->mv);\n
+  // return cs[0]->mv->typ;\n}', 'type': 'type'}
+  type typ() const;
 
-  Shape() : tok(tok()) {}
+  Shape() : cs(std::vector<token>()) {}
 
-  Shape(const tok &tok) : tok(tok) {}
+  Shape(const std::vector<token> &cs) : cs(cs) {}
 
-  static shape create(const tok &tok);
+  static shape create(const std::vector<token> &cs);
 
-  static shape get_or_create(const token &x);
-  shape save() const { return get_or_create(tok); }
+  static shape get_or_create(const std::vector<token> &x);
+  static shape get_if_exists(const std::vector<token> &x);
+  shape save() const { return get_or_create(cs); }
 };
 
 struct ShapeIndex {
 
-  // {'getter': 'tok', 'unique': True, 'type': 'token'}
-  static std::unordered_map<token, shape> lookup_by_tok_index;
-  static shape lookup_by_tok(const token &x);
-
-  // {'getter': 'type', 'type': 'token'}
-  using lookup_by_type_index_type = std::unordered_multimap<token, shape>;
+  // {'getter': 'typ()', 'type': 'type'}
+  using lookup_by_type_index_type = std::unordered_multimap<type, shape>;
   static lookup_by_type_index_type lookup_by_type_index;
   using lookup_by_type_index_iterator =
       lookup_by_type_index_type::const_iterator;
   static std::pair<lookup_by_type_index_iterator, lookup_by_type_index_iterator>
-  lookup_by_type(const token &x);
+  lookup_by_type(const type &x);
+
+  // {'getter': 'cs', 'unique': True, 'type': 'std::vector<token>'}
+  static std::unordered_map<std::vector<token>, shape> lookup_by_cs_index;
+  static shape lookup_by_cs(const std::vector<token> &x);
+
+  // {'getter': 'cs', 'type': 'token', 'iterable': True}
+  using lookup_by_token_index_type = std::unordered_multimap<token, shape>;
+  static lookup_by_token_index_type lookup_by_token_index;
+  using lookup_by_token_index_iterator =
+      lookup_by_token_index_type::const_iterator;
+  static std::pair<lookup_by_token_index_iterator,
+                   lookup_by_token_index_iterator>
+  lookup_by_token(const token &x);
 
   static shape index(shape);
   static std::vector<Shape> all_Shapes;

@@ -1,0 +1,16 @@
+name: Type
+includes:
+  - token.h
+  - metavar.h
+members:
+  tok: token
+back_edges:
+  mvs: std::vector<metavar>
+unique_index: lookup_by_tok
+lookups:
+  lookup_by_tok:
+    type: token
+    getter: tok
+    unique: true
+post_save:
+  for(int i = 0; i < 16; i++) t->mvs->push_back(t->get_metavar(i));
