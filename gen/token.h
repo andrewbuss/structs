@@ -51,6 +51,7 @@ struct TokenIndex {
   static token lookup_by_s(const std::string &x);
 
   static token index(token);
+  static std::vector<Token> all_Tokens;
 };
 
 std::ostream &operator<<(std::ostream &os, const Token &);

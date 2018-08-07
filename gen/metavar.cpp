@@ -3,17 +3,21 @@
 #include <metavar.h>
 #include <token.h>
 
-std::vector<Metavar> all_metavars{{}};
-const Metavar *metavar::operator->() const { return all_metavars.data() + i; }
-const Metavar &metavar::operator*() const { return all_metavars[i]; }
+std::vector<Metavar> MetavarIndex::all_Metavars{{}};
+const Metavar *metavar::operator->() const {
+  return MetavarIndex::all_Metavars.data() + i;
+}
+const Metavar &metavar::operator*() const {
+  return MetavarIndex::all_Metavars[i];
+}
 
 std::unordered_map<token, metavar> MetavarIndex::lookup_by_tok_index;
 
 MetavarIndex::lookup_by_type_index_type MetavarIndex::lookup_by_type_index;
 
 metavar Metavar::create(const token &tok, const token &type) {
-  all_metavars.push_back({tok, type});
-  metavar m = {(int)all_metavars.size() - 1};
+  MetavarIndex::all_Metavars.push_back({tok, type});
+  metavar m = {(int)MetavarIndex::all_Metavars.size() - 1};
   return MetavarIndex::index(m);
 }
 
@@ -47,6 +51,7 @@ metavar MetavarIndex::index(const metavar m) {
   lookup_by_type_index.emplace(obj_type, m);
   return m;
 }
+
 /*
 std::ostream& operator<<(std::ostream& os, const Metavar& m) {
   os << "Metavar{";

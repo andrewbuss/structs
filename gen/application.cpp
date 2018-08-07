@@ -13,12 +13,12 @@
 
 #include <unordered_map>
 
-std::vector<Application> all_applications{{}};
+std::vector<Application> ApplicationIndex::all_Applications{{}};
 const Application *application::operator->() const {
-  return all_applications.data() + i;
+  return ApplicationIndex::all_Applications.data() + i;
 }
 const Application &application::operator*() const {
-  return all_applications[i];
+  return ApplicationIndex::all_Applications[i];
 }
 
 ApplicationIndex::lookup_by_rule_index_type
@@ -41,11 +41,12 @@ judgment Application::hypothesis_or_empty() const {
 }
 
 application Application::create(
-    const rule &via, const std::unordered_set<application> &condition_proofs,
+    const rule &via,
+    const std::unordered_map<token, std::vector<application>> &conditions,
     const judgment &result,
-    const std::unordered_map<token, std::vector<judgment>> &args) {
-  all_applications.push_back({via, condition_proofs, result, args});
-  application a = {(int)all_applications.size() - 1};
+    const std::unordered_map<token, std::vector<application>> &args) {
+  ApplicationIndex::all_Applications.push_back({via, conditions, result, args});
+  application a = {(int)ApplicationIndex::all_Applications.size() - 1};
   return ApplicationIndex::index(a);
 }
 
@@ -88,11 +89,12 @@ application ApplicationIndex::index(const application a) {
   lookup_by_result_index.emplace(obj_result, a);
   return a;
 }
+
 /*
 std::ostream& operator<<(std::ostream& os, const Application& a) {
   os << "Application{";
-  os <<  a.via;os <<  ", " <<  a.condition_proofs;os <<  ", " <<  a.result;os <<
-", " <<  a.args;return os << "}";
+  os <<  a.via;os <<  ", " <<  a.conditions;os <<  ", " <<  a.result;os <<  ", "
+<<  a.args;return os << "}";
 }
 */
 

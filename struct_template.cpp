@@ -8,9 +8,9 @@
 #include <{{ include }}>
 {% endfor %}
 
-std::vector<{{ name }}> all_{{ plural }}{ {} };
-const {{ name }}* {{ lname }}::operator->() const { return all_{{ plural }}.data() + i; }
-const {{ name }}& {{ lname }}::operator*() const { return all_{{ plural }}[i]; }
+std::vector<{{ name }}> {{ name }}Index::all_{{ name }}s{ {} };
+const {{ name }}* {{ lname }}::operator->() const { return {{ name }}Index::all_{{ name }}s.data() + i; }
+const {{ name }}& {{ lname }}::operator*() const { return {{ name }}Index::all_{{ name }}s[i]; }
 
 {% for lookup, lookup_spec in (lookups or {}).items() %}
 {%- if lookup_spec.unique %}
@@ -32,8 +32,8 @@ std::unordered_map<{{ lookup_spec.type }}, {{ lname }}> {{ name }}Index::{{ look
   {%- for member, type in members.items() -%}
   {{ comma() }}const {{ type }}& {{ member }}
   {%- endfor -%}) {
-  all_{{ plural }}.push_back({ {{ all_members }} });
-  {{ lname }} {{ abbr }} = {(int)all_{{ plural }}.size() - 1};
+  {{ name }}Index::all_{{ name }}s.push_back({ {{ all_members }} });
+  {{ lname }} {{ abbr }} = {(int){{ name }}Index::all_{{ name }}s.size() - 1};
   return {{ name }}Index::index({{ abbr }});
 }
 
@@ -80,6 +80,7 @@ std::pair<{{ name }}Index::{{ lookup }}_index_iterator,
   {%- endfor %}
   return {{ abbr }};
 }
+
 /*
 std::ostream& operator<<(std::ostream& os, const {{ name }}& {{ abbr }}) {
   os << "{{ name }}{";

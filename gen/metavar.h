@@ -72,6 +72,7 @@ struct MetavarIndex {
   lookup_by_type(const token &x);
 
   static metavar index(metavar);
+  static std::vector<Metavar> all_Metavars;
 };
 
 std::ostream &operator<<(std::ostream &os, const Metavar &);

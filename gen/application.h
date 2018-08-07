@@ -43,33 +43,34 @@ template <> struct hash<const application> {
 } // namespace std
 
 struct Application {
-  // {'via': 'rule', 'condition_proofs': 'std::unordered_set<application>',
-  // 'result': 'judgment', 'args': 'std::unordered_map<token,
-  // std::vector<judgment>>'}
+  // {'via': 'rule', 'conditions': 'std::unordered_map<token,
+  // std::vector<application>>', 'result': 'judgment', 'args':
+  // 'std::unordered_map<token, std::vector<application>>'}
   const rule via;
-  const std::unordered_set<application> condition_proofs;
+  const std::unordered_map<token, std::vector<application>> conditions;
   const judgment result;
-  const std::unordered_map<token, std::vector<judgment>> args;
+  const std::unordered_map<token, std::vector<application>> args;
   // {'body': '{ if(via) return 0; else return result; }', 'type': 'judgment'}
   judgment hypothesis_or_empty() const;
 
   Application()
-      : via(rule()), condition_proofs(std::unordered_set<application>()),
+      : via(rule()),
+        conditions(std::unordered_map<token, std::vector<application>>()),
         result(judgment()),
-        args(std::unordered_map<token, std::vector<judgment>>()) {}
+        args(std::unordered_map<token, std::vector<application>>()) {}
 
-  Application(const rule &via,
-              const std::unordered_set<application> &condition_proofs,
-              const judgment &result,
-              const std::unordered_map<token, std::vector<judgment>> &args)
-      : via(via), condition_proofs(condition_proofs), result(result),
-        args(args) {}
+  Application(
+      const rule &via,
+      const std::unordered_map<token, std::vector<application>> &conditions,
+      const judgment &result,
+      const std::unordered_map<token, std::vector<application>> &args)
+      : via(via), conditions(conditions), result(result), args(args) {}
 
   static application
   create(const rule &via,
-         const std::unordered_set<application> &condition_proofs,
+         const std::unordered_map<token, std::vector<application>> &conditions,
          const judgment &result,
-         const std::unordered_map<token, std::vector<judgment>> &args);
+         const std::unordered_map<token, std::vector<application>> &args);
 
   static application get_or_create(const judgment &x);
   application save() const { return get_or_create(hypothesis_or_empty()); }
@@ -80,6 +81,18 @@ struct Application {
     return get_or_create(j);
   }
   static application create(judgment j) { return create(rule(), {}, j, {}); }
+  std::unordered_set<judgment> assumptions() const {
+    std::unordered_set<judgment> rv;
+    for (const auto &[type, conditions_of_type] : conditions) {
+      for (const auto &c : conditions_of_type) {
+        if (!c->via && c->conditions.size() == 0)
+          continue;
+        const auto &c_assumptions = c.assumptions();
+        rv.insert(c_assumptions.begin(); c_assumptions.end());
+      }
+    }
+    return rv;
+  }
 };
 
 struct ApplicationIndex {
@@ -107,6 +120,7 @@ struct ApplicationIndex {
   lookup_by_result(const judgment &x);
 
   static application index(application);
+  static std::vector<Application> all_Applications;
 };
 
 std::ostream &operator<<(std::ostream &os, const Application &);

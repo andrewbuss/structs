@@ -33,23 +33,57 @@ template <> struct hash<const judgment> {
 } // namespace std
 
 struct Judgment {
-  // {'cs': 'std::vector<token>'}
+  // {'cs': 'std::vector<token>', 's': 'shape', 'n': 'naming'}
   const std::vector<token> cs;
+  const shape s;
+  const naming n;
   // {'body': '{ if(cs.size() > 0) return cs[0]; else return token(); }',
   // 'type': 'token'}
   token type() const;
 
-  Judgment() : cs(std::vector<token>()) {}
+  Judgment() : cs(std::vector<token>()), s(shape()), n(naming()) {}
 
-  Judgment(const std::vector<token> &cs) : cs(cs) {}
+  Judgment(const std::vector<token> &cs, const shape &s, const naming &n)
+      : cs(cs), s(s), n(n) {}
 
-  static judgment create(const std::vector<token> &cs);
+  static judgment create(const std::vector<token> &cs, const shape &s,
+                         const naming &n);
 
   static judgment get_or_create(const std::vector<token> &x);
   judgment save() const { return get_or_create(cs); }
+
+  judgment get_or_create(std::vector<std::string> ss) {
+    std::vector<token> ts;
+    for (const auto &s : ss) {
+      ts.push_back(Token::get_or_create(s));
+    }
+    return get_or_create(ts);
+  }
 };
 
 struct JudgmentIndex {
+
+  // {'getter': 'n', 'type': 'naming'}
+  using lookup_by_naming_index_type = std::unordered_multimap<naming, judgment>;
+  static lookup_by_naming_index_type lookup_by_naming_index;
+  using lookup_by_naming_index_iterator =
+      lookup_by_naming_index_type::const_iterator;
+  static std::pair<lookup_by_naming_index_iterator,
+                   lookup_by_naming_index_iterator>
+  lookup_by_naming(const naming &x);
+
+  // {'getter': 's', 'type': 'shape'}
+  using lookup_by_shape_index_type = std::unordered_multimap<shape, judgment>;
+  static lookup_by_shape_index_type lookup_by_shape_index;
+  using lookup_by_shape_index_iterator =
+      lookup_by_shape_index_type::const_iterator;
+  static std::pair<lookup_by_shape_index_iterator,
+                   lookup_by_shape_index_iterator>
+  lookup_by_shape(const shape &x);
+
+  // {'getter': 'cs', 'unique': True, 'type': 'std::vector<token>'}
+  static std::unordered_map<std::vector<token>, judgment> lookup_by_cs_index;
+  static judgment lookup_by_cs(const std::vector<token> &x);
 
   // {'getter': 'type()', 'type': 'token'}
   using lookup_by_type_index_type = std::unordered_multimap<token, judgment>;
@@ -58,10 +92,6 @@ struct JudgmentIndex {
       lookup_by_type_index_type::const_iterator;
   static std::pair<lookup_by_type_index_iterator, lookup_by_type_index_iterator>
   lookup_by_type(const token &x);
-
-  // {'getter': 'cs', 'unique': True, 'type': 'std::vector<token>'}
-  static std::unordered_map<std::vector<token>, judgment> lookup_by_cs_index;
-  static judgment lookup_by_cs(const std::vector<token> &x);
 
   // {'getter': 'cs', 'type': 'token', 'iterable': True}
   using lookup_by_token_index_type = std::unordered_multimap<token, judgment>;
@@ -73,6 +103,7 @@ struct JudgmentIndex {
   lookup_by_token(const token &x);
 
   static judgment index(judgment);
+  static std::vector<Judgment> all_Judgments;
 };
 
 std::ostream &operator<<(std::ostream &os, const Judgment &);

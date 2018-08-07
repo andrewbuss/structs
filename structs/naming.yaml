@@ -1,4 +1,4 @@
-name: Judgment
+name: Naming
 includes:
   - token.h
 members:
@@ -11,12 +11,6 @@ properties:
     body: "{ if(cs.size() > 0) return cs[0]; else return token(); }"
 unique_index: lookup_by_cs
 lookups:
-  lookup_by_shape:
-    type: shape
-    getter: s
-  lookup_by_naming:
-    type: naming
-    getter: n
   lookup_by_cs:
     type: std::vector<token>
     getter: cs
@@ -24,6 +18,12 @@ lookups:
   lookup_by_type:
     type: token
     getter: type()
+  lookup_by_shape:
+    type: shape
+    getter: s
+  lookup_by_naming:
+    type: naming
+    getter: n
   lookup_by_token:
     type: token
     getter: cs

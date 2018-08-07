@@ -108,6 +108,7 @@ struct RuleIndex {
   static rule lookup_by_label(const token &x);
 
   static rule index(rule);
+  static std::vector<Rule> all_Rules;
 };
 
 std::ostream &operator<<(std::ostream &os, const Rule &);

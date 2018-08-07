@@ -2,15 +2,17 @@
 
 #include <token.h>
 
-std::vector<Token> all_tokens{{}};
-const Token *token::operator->() const { return all_tokens.data() + i; }
-const Token &token::operator*() const { return all_tokens[i]; }
+std::vector<Token> TokenIndex::all_Tokens{{}};
+const Token *token::operator->() const {
+  return TokenIndex::all_Tokens.data() + i;
+}
+const Token &token::operator*() const { return TokenIndex::all_Tokens[i]; }
 
 std::unordered_map<std::string, token> TokenIndex::lookup_by_s_index;
 
 token Token::create(const std::string &s) {
-  all_tokens.push_back({s});
-  token t = {(int)all_tokens.size() - 1};
+  TokenIndex::all_Tokens.push_back({s});
+  token t = {(int)TokenIndex::all_Tokens.size() - 1};
   return TokenIndex::index(t);
 }
 
@@ -35,6 +37,7 @@ token TokenIndex::index(const token t) {
   lookup_by_s_index[obj_s] = t;
   return t;
 }
+
 /*
 std::ostream& operator<<(std::ostream& os, const Token& t) {
   os << "Token{";

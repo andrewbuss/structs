@@ -9,9 +9,9 @@
 
 #include <unordered_map>
 
-std::vector<Rule> all_rules{{}};
-const Rule *rule::operator->() const { return all_rules.data() + i; }
-const Rule &rule::operator*() const { return all_rules[i]; }
+std::vector<Rule> RuleIndex::all_Rules{{}};
+const Rule *rule::operator->() const { return RuleIndex::all_Rules.data() + i; }
+const Rule &rule::operator*() const { return RuleIndex::all_Rules[i]; }
 
 RuleIndex::lookup_by_signature_index_type RuleIndex::lookup_by_signature_index;
 
@@ -32,8 +32,8 @@ rule Rule::create(
     const std::unordered_map<token, int> &arity, const judgment &conclusion,
     const std::unordered_map<token, std::vector<judgment>> &conditions,
     const token &label) {
-  all_rules.push_back({arity, conclusion, conditions, label});
-  rule r = {(int)all_rules.size() - 1};
+  RuleIndex::all_Rules.push_back({arity, conclusion, conditions, label});
+  rule r = {(int)RuleIndex::all_Rules.size() - 1};
   return RuleIndex::index(r);
 }
 
@@ -78,6 +78,7 @@ rule RuleIndex::index(const rule r) {
   lookup_by_label_index[obj_label] = r;
   return r;
 }
+
 /*
 std::ostream& operator<<(std::ostream& os, const Rule& r) {
   os << "Rule{";

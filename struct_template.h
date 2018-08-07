@@ -111,6 +111,7 @@ struct {{ name }}Index {
   {% endif %}
   {% endfor %}
   static {{ lname }} index({{ lname }});
+  static std::vector<{{ name }}> all_{{ name }}s;
 };
 
 std::ostream& operator<<(std::ostream& os, const {{ name }}&);
