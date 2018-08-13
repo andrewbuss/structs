@@ -10,7 +10,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include <token.h>
+#include <token_ptr.h>
 
 #include <metavar.h>
 

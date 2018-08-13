@@ -8,11 +8,11 @@ includes:
   - unordered_map
   - unordered_set
 usings:
-  stack: std::unordered_map<type, std::vector<application>>
+  Stack: std::unordered_map<type, std::vector<application>>
 members:
   via: rule
-  args: stack
-  conditions: stack
+  args: Stack
+  conditions: Stack
   result: judgment
 unique_index: lookup_by_hypothesis
 properties:

@@ -24,13 +24,13 @@
 
 #include <unordered_set>
 
-using stack = std::unordered_map<type, std::vector<application>>;
+using Stack = std::unordered_map<type, std::vector<application>>;
 
 struct Application {
   const rule via;
-  const stack conditions;
+  const Stack conditions;
   const judgment result;
-  const stack args;
+  const Stack args;
   // {'body': '{ if(via) return 0; else return result; }', 'type': 'judgment'}
   judgment hypothesis_or_empty()
       const; // {'body': '{\n  std::unordered_set<judgment> rv;\n  for(const
@@ -43,14 +43,14 @@ struct Application {
   std::unordered_set<judgment> assumptions() const;
 
   Application()
-      : via(rule()), conditions(stack()), result(judgment()), args(stack()) {}
+      : via(rule()), conditions(Stack()), result(judgment()), args(Stack()) {}
 
-  Application(const rule &via, const stack &conditions, const judgment &result,
-              const stack &args)
+  Application(const rule &via, const Stack &conditions, const judgment &result,
+              const Stack &args)
       : via(via), conditions(conditions), result(result), args(args) {}
 
-  static application create(const rule &via, const stack &conditions,
-                            const judgment &result, const stack &args);
+  static application create(const rule &via, const Stack &conditions,
+                            const judgment &result, const Stack &args);
 
   static application get_or_create(const judgment &x);
   static application get_if_exists(const judgment &x);

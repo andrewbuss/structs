@@ -8,7 +8,7 @@ cpp_includes:
 members:
   typ: type
   i: uint8_t
-back_edges:
+mutable:
   tok: token
 properties:
   typ_i:

@@ -20,6 +20,10 @@ struct Token {
   const std::string s;
   mutable metavar mv;
   mutable type typ;
+  mutable type var_typ;
+  // {'body': 'if(!typ)\n  typ = Type::get_or_create(this -
+  // TokenIndex::all_Tokens.data());\nreturn typ;', 'type': 'type'}
+  type as_type() const;
 
   Token() : s(std::string()) {}
 

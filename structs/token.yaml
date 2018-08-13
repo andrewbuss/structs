@@ -5,9 +5,10 @@ includes:
   - type.h
 members:
   s: std::string
-back_edges:
+mutable:
   mv: metavar
   typ: type
+  var_typ: type
 unique_index: lookup_by_s
 lookups:
   lookup_by_s:
@@ -16,6 +17,13 @@ lookups:
     unique: true
 to_ostream:
   return os << t->s;
+properties:
+  as_type:
+    type: type
+    body: >-
+      if(!typ)
+        typ = Type::get_or_create(this - TokenIndex::all_Tokens.data());
+      return typ;
 post_create: >-
   auto pos = t->s.find('$');
   if(pos != std::string::npos) {

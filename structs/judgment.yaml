@@ -3,14 +3,18 @@ includes:
   - token.h
   - type.h
   - constant.h
-  - shape.h
   - metavar.h
 usings:
+  shape: std::vector<token>
   naming: std::vector<uint8_t>
+  substitution: std::unordered_map<metavar, judgment>
   shape_naming: std::pair<shape, naming>
+  ForwardRenaming: std::unordered_map<token, metavar>
 members:
+  typ: type
   shp: shape
   nam: naming
+  sub: substitition
 properties:
   shp_nam:
     type: shape_naming
@@ -19,7 +23,7 @@ properties:
     type: std::vector<token>
     body: >-
       {
-        std::vector<token> cs(shp->cs);
+        std::vector<token> rv;
         int x = 0;
         for(auto& s : cs) {
           if(s->typ) {
@@ -47,7 +51,7 @@ lookups:
     unique: true
   lookup_by_type:
     type: type
-    getter: shp->typ()
+    getter: typ()
 extra: >-
   static judgment get_or_create(const std::vector<std::string>& ss) {
     std::vector<token> toks;
@@ -71,4 +75,16 @@ extra: >-
 
   inline static judgment create(const shape_naming& shp_nam) {
     return create(shp_nam.first, shp_nam.second);
+  }
+
+  static judgment get_or_create(shape shp, const ForwardRenaming& r) {
+    vector<token> cs(shp.cs);
+    naming nam;
+    for (token &t : shp) {
+      if(t->var_typ) {
+        nam.push_back(r[t]);
+        t = r[t]->t;
+      }
+    }
+    return get_or_create(std_make_pair(Shape::get_or_create(cs), nam));
   }

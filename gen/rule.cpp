@@ -17,7 +17,7 @@ RuleIndex::lookup_by_conclusion_type_index_type
 std::unordered_map<token, rule> RuleIndex::lookup_by_label_index;
 
 rule Rule::create(
-    const arity_t &arity, const judgment &conclusion,
+    const Arity &arity, const judgment &conclusion,
     const std::unordered_map<token, std::vector<judgment>> &conditions,
     const token &label) {
   RuleIndex::all_Rules.push_back({arity, conclusion, conditions, label});
@@ -26,10 +26,10 @@ rule Rule::create(
   return RuleIndex::index(r);
 }
 
-// {'getter': 'arity', 'type': 'arity_t'}
+// {'getter': 'arity', 'type': 'Arity'}
 std::pair<RuleIndex::lookup_by_signature_index_iterator,
           RuleIndex::lookup_by_signature_index_iterator>
-RuleIndex::lookup_by_signature(const arity_t &x) {
+RuleIndex::lookup_by_signature(const Arity &x) {
   return lookup_by_signature_index.equal_range(x);
 }
 

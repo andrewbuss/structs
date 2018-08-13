@@ -18,29 +18,29 @@
 
 #include <unordered_map>
 
-using arity_t = std::unordered_map<token, int>;
+using Arity = std::unordered_map<type, uint8_t>;
 
 struct application;
 
 struct Rule {
-  const arity_t arity;
+  const Arity arity;
   const judgment conclusion;
   const std::unordered_map<token, std::vector<judgment>> conditions;
   const token label;
 
   Rule()
-      : arity(arity_t()), conclusion(judgment()),
+      : arity(Arity()), conclusion(judgment()),
         conditions(std::unordered_map<token, std::vector<judgment>>()),
         label(token()) {}
 
-  Rule(const arity_t &arity, const judgment &conclusion,
+  Rule(const Arity &arity, const judgment &conclusion,
        const std::unordered_map<token, std::vector<judgment>> &conditions,
        const token &label)
       : arity(arity), conclusion(conclusion), conditions(conditions),
         label(label) {}
 
   static rule
-  create(const arity_t &arity, const judgment &conclusion,
+  create(const Arity &arity, const judgment &conclusion,
          const std::unordered_map<token, std::vector<judgment>> &conditions,
          const token &label);
 
@@ -49,14 +49,14 @@ struct Rule {
 
 struct RuleIndex {
 
-  // {'getter': 'arity', 'type': 'arity_t'}
-  using lookup_by_signature_index_type = std::unordered_multimap<arity_t, rule>;
+  // {'getter': 'arity', 'type': 'Arity'}
+  using lookup_by_signature_index_type = std::unordered_multimap<Arity, rule>;
   static lookup_by_signature_index_type lookup_by_signature_index;
   using lookup_by_signature_index_iterator =
       lookup_by_signature_index_type::const_iterator;
   static std::pair<lookup_by_signature_index_iterator,
                    lookup_by_signature_index_iterator>
-  lookup_by_signature(const arity_t &x);
+  lookup_by_signature(const Arity &x);
 
   // {'getter': 'conclusion', 'type': 'judgment'}
   using lookup_by_conclusion_index_type =

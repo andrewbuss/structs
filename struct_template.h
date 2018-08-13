@@ -30,7 +30,7 @@ struct {{ name }} {
   const {{ type }} {{ member }};
   {% endfor -%}
 
-  {% for name, type in (back_edges or {}).items() -%}
+  {% for name, type in (mutable or {}).items() -%}
   mutable {{ type }} {{ name }};
   {% endfor -%}
 

@@ -10,6 +10,14 @@ const Token &token::operator*() const { return TokenIndex::all_Tokens[i]; }
 
 std::unordered_map<std::string, token> TokenIndex::lookup_by_s_index;
 
+// {'body': 'if(!typ)\n  typ = Type::get_or_create(this -
+// TokenIndex::all_Tokens.data());\nreturn typ;', 'type': 'type'}
+type Token::as_type() const {
+  if (!typ)
+    typ = Type::get_or_create(this - TokenIndex::all_Tokens.data());
+  return typ;
+}
+
 token Token::create(const std::string &s) {
   TokenIndex::all_Tokens.push_back({s});
   token t{(int)TokenIndex::all_Tokens.size() - 1};

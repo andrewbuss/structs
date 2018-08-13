@@ -48,8 +48,8 @@ std::unordered_set<judgment> Application::assumptions() const {
   }
 }
 
-application Application::create(const rule &via, const stack &conditions,
-                                const judgment &result, const stack &args) {
+application Application::create(const rule &via, const Stack &conditions,
+                                const judgment &result, const Stack &args) {
   ApplicationIndex::all_Applications.push_back({via, conditions, result, args});
   application a{(int)ApplicationIndex::all_Applications.size() - 1};
 

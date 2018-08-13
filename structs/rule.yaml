@@ -5,11 +5,11 @@ includes:
   - set
   - unordered_map
 usings:
-  arity_t: std::unordered_map<token, int>
+  Arity: std::unordered_map<type, uint8_t>
 forward_declared_structs:
   - application
 members:
-  arity: arity_t
+  arity: Arity
   conditions: std::unordered_map<token, std::vector<judgment>>
   conclusion: judgment
   label: token
@@ -19,7 +19,7 @@ lookups:
     type: judgment
   lookup_by_signature:
     getter: arity
-    type: arity_t
+    type: Arity
   lookup_by_conclusion_type:
     getter: conclusion->shp->typ()
     type: token
