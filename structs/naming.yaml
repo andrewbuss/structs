@@ -1,0 +1,14 @@
+name: Naming
+includes:
+  - stdint.h
+  - vector
+usings:
+  mapping: std::vector<int>
+members:
+  map: mapping
+unique_index: lookup_by_map
+lookups:
+  lookup_by_map:
+    type: mapping
+    getter: map
+    unique: true

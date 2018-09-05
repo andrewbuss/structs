@@ -1,0 +1,25 @@
+name: Proof
+includes:
+  - axiom.h
+  - vector
+usings:
+  axiom_axioms: std::pair<axiom, axioms>
+members:
+  via: axiom
+  args: axioms
+properties:
+  via_args:
+    type: axiom_axioms
+    body: "{ return std::make_pair(via, args); }"
+lookups:
+  lookup_by_via:
+    type: axiom
+    getter: via
+  lookup_by_arg:
+    type: axiom
+    getter: args
+    iterable: true
+  lookup_by_via_args:
+    type: axiom_axioms
+    getter: via_args()
+    unique: true

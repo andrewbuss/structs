@@ -10,30 +10,31 @@
 #include <unordered_set>
 #include <vector>
 
-#include <token.h>
+#include <stdint.h>
 
-#include <cstdint>
+#include <vector>
+
+using mapping = std::vector<int>;
 
 struct Naming {
-  // {'is': 'std::vector<uint8_t>'}
-  const std::vector<uint8_t> is;
+  const mapping map;
 
-  Naming() : is(std::vector<uint8_t>()) {}
+  Naming() : map(mapping()) {}
 
-  Naming(const std::vector<uint8_t> &is) : is(is) {}
+  Naming(const mapping &map) : map(map) {}
 
-  static naming create(const std::vector<uint8_t> &is);
+  static naming create(const mapping &map);
 
-  static naming get_or_create(const std::vector<uint8_t> &x);
-  static naming get_if_exists(const std::vector<uint8_t> &x);
-  naming save() const { return get_or_create(is); }
+  static naming get_or_create(const mapping &x);
+  static naming get_if_exists(const mapping &x);
+  naming save() const { return get_or_create(map); }
 };
 
 struct NamingIndex {
 
-  // {'getter': 'is', 'unique': True, 'type': 'std::vector<uint8_t>'}
-  static std::unordered_map<std::vector<uint8_t>, naming> lookup_by_is_index;
-  static naming lookup_by_is(const std::vector<uint8_t> &x);
+  // {'getter': 'map', 'unique': True, 'type': 'mapping'}
+  static std::unordered_map<mapping, naming> lookup_by_map_index;
+  static naming lookup_by_map(const mapping &x);
 
   static naming index(naming);
   static std::vector<Naming> all_Namings;

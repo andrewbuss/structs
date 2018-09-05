@@ -21,19 +21,29 @@ properties:
   as_type:
     type: type
     body: >-
-      if(!typ)
+      if(!typ) {
         typ = Type::get_or_create(this - TokenIndex::all_Tokens.data());
+      }
       return typ;
 post_create: >-
   auto pos = t->s.find('$');
   if(pos != std::string::npos) {
     token typ_token = TokenIndex::lookup_by_s(t->s.substr(0, pos));
-    type typ = Type::get_or_create(typ_token);
-    for(int i = 0; i < 16; i++) {
-      metavar mv = Metavar::create(typ, i);
-      typ->mvs.push_back(mv);
-      mv->tok = t;
+    type typ = typ_token->as_type();
+    if (MetavarIndex::lookup_by_typ_index.count(typ) == 0) {
+
+      typ_token->typ = typ;
+      uint8_t i = std::stoi(t->s.substr(pos + 1, t->s.size() - pos - 1));
+
+      std::cout << "creating metavars from " << t << " " << typ << std::endl;
+      for(int j = 0; j < 16; j++) {
+        metavar mv = Metavar::create(j, typ);
+        typ->mvs.push_back(mv);
+        if(j == i) continue;
+        mv->tok = Token::get_or_create(typ_token->s + "$" + std::to_string(j));
+        mv->tok->mv = mv;
+      }
+      t->mv = MetavarIndex::lookup_by_typ_i(std::make_pair(typ, i));
+      t->mv->tok = t;
     }
-    uint8_t i = std::stoi(t->s.substr(0, t->s.size() - pos - 1));
-    t->mv = MetavarIndex::lookup_by_typ_i(std::make_pair(typ, i));
   }

@@ -1,0 +1,35 @@
+name: Axiom
+includes:
+  - substitution.h
+  - vector
+usings:
+  substitution_substitutions: std::pair<substitution, substitutions>
+  axioms: std::vector<axiom>
+members:
+  sub: substitution
+  hyps: substitutions
+unique_index: lookup_by_sub_hyps
+properties:
+  sub_hyps:
+    type: substitution_substitutions
+    body: "{ return std::make_pair(sub, hyps); }"
+lookups:
+  lookup_by_sub:
+    type: substitution
+    getter: sub
+  lookup_by_hyp:
+    type: substitution
+    getter: hyps
+    iterable: true
+  lookup_by_sub_hyps:
+    type: substitution_substitutions
+    getter: sub_hyps()
+    unique: true
+extra: >-
+  inline static axiom create(const substitution_substitutions& sub_hyps) {
+    return create(sub_hyps.first, sub_hyps.second);
+  }
+
+  static axiom get_or_create(const substitution sub, const substitutions& hyps) {
+    return get_or_create(std::make_pair(sub, hyps));
+  }

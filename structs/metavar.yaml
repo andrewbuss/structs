@@ -7,23 +7,29 @@ cpp_includes:
   - type.h
 members:
   typ: type
-  i: uint8_t
+  i: int
 mutable:
   tok: token
 properties:
   typ_i:
-    type: std::pair<type, uint8_t>
+    type: std::pair<type, int>
     body: "{ return std::make_pair(typ, i); }"
 unique_index: lookup_by_typ_i
+to_ostream:
+  return os << tok;
 lookups:
   lookup_by_typ:
     getter: typ
     type: type
   lookup_by_typ_i:
     getter: typ_i()
-    type: std::pair<type, uint8_t>
+    type: std::pair<type, int>
     unique: true
 extra: >-
-  inline static metavar create(const std::pair<type, uint8_t> typ_i) {
+  inline static metavar create(const std::pair<type, int> typ_i) {
     return Metavar::create(typ_i.first, typ_i.second);
+  }
+
+  static metavar get_or_create(type typ, int i) {
+    return get_or_create(std::make_pair(typ, i));
   }

@@ -5,6 +5,7 @@
 std::vector<Type> TypeIndex::all_Types{{}};
 const Type *type::operator->() const { return TypeIndex::all_Types.data() + i; }
 const Type &type::operator*() const { return TypeIndex::all_Types[i]; }
+type type::null = 0;
 
 std::unordered_map<token, type> TypeIndex::lookup_by_tok_index;
 
@@ -16,16 +17,16 @@ type Type::create(const token &tok) {
 }
 
 type Type::get_or_create(const token &x) {
-  auto t = TypeIndex::lookup_by_tok(x);
-  if (!t)
+  auto t = TypeIndex::lookup_by_tok_index.find(x);
+  if (t == TypeIndex::lookup_by_tok_index.end())
     return create(x);
-  return t;
+  return t->second;
 }
 
 type Type::get_if_exists(const token &x) {
   auto t = TypeIndex::lookup_by_tok(x);
   if (!t)
-    return type{0};
+    return type::null;
   return t;
 }
 
@@ -44,15 +45,12 @@ type TypeIndex::index(const type t) {
   return t;
 }
 
-/*
-std::ostream& operator<<(std::ostream& os, const Type& t) {
+std::ostream &operator<<(std::ostream &os, const Type &t) {
   os << "Type{";
-  os <<  t.tok;return os << "}";
+  os << t.tok;
+  return os << "}";
 }
-*/
 
-/*
-std::ostream& operator<<(std::ostream& os, const type& t) {
-  return os << t.i;
+std::ostream &operator<<(std::ostream &os, const type &t) {
+  return os << *(t) << "@" << t.i;
 }
-*/

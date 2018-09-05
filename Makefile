@@ -1,6 +1,6 @@
 CXXFLAGS=-Igen/ -Iinclude/
 .PRECIOUS: gen/%.cpp gen/%.h
-main: gen/token.o gen/judgment.o gen/rule.o gen/application.o gen/metavar.o gen/shape.o gen/naming.o gen/type.o gen/constant.o
+main: gen/token.o gen/judgment.o gen/rule.o gen/substitution.o gen/metavar.o gen/shape.o gen/naming.o gen/type.o gen/axiom.o gen/proof.o
 
 gen/:
 	mkdir gen

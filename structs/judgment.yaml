@@ -2,38 +2,42 @@ name: Judgment
 includes:
   - token.h
   - type.h
-  - constant.h
+  - shape.h
+  - naming.h
   - metavar.h
+  - string
+  - vector
 usings:
-  shape: std::vector<token>
-  naming: std::vector<uint8_t>
-  substitution: std::unordered_map<metavar, judgment>
   shape_naming: std::pair<shape, naming>
+  judgments: std::vector<judgment>
   ForwardRenaming: std::unordered_map<token, metavar>
 members:
-  typ: type
   shp: shape
   nam: naming
-  sub: substitition
+unique_index: lookup_by_shp_nam
 properties:
   shp_nam:
     type: shape_naming
     body: "{ return std::make_pair(shp, nam); }"
-  cs:
-    type: std::vector<token>
+  flattened:
+    type: shape
     body: >-
       {
-        std::vector<token> rv;
+        std::vector<token> rv(shp->shp);
         int x = 0;
-        for(auto& s : cs) {
+        bool first = true;
+        for(auto& s : rv) {
+          if(first) {
+            first = false;
+            continue;
+          }
           if(s->typ) {
-            uint8_t i = nam[x++];
+            uint8_t i = nam->map[x++];
             s = s->typ->mvs[i]->tok;
           }
         }
-        return cs;
+        return Shape::get_or_create(rv);
       }
-unique_index: lookup_by_shp_nam
 lookups:
   lookup_by_shape:
     type: shape
@@ -45,46 +49,42 @@ lookups:
     type: shape_naming
     getter: shp_nam()
     unique: true
-  lookup_by_cs:
-    type: std::vector<token>
-    getter: cs()
-    unique: true
-  lookup_by_type:
-    type: type
-    getter: typ()
 extra: >-
-  static judgment get_or_create(const std::vector<std::string>& ss) {
-    std::vector<token> toks;
-    for(const auto& s: ss) {
-      toks.push_back(Token::get_or_create(s));
-    }
-    return get_or_create(toks);
-  }
-
-  static judgment get_or_create(const std::vector<token>& ts) {
-    std::vector<token> shp(ts);
-    naming nam;
-    for(auto& t : shp) {
-      if(t->mv) {
-        t = t->mv->typ->tok;
-        nam.push_back(t->mv->i);
-      }
-    }
-    return get_or_create(std::make_pair(Shape::get_or_create(shp), nam));
-  }
-
   inline static judgment create(const shape_naming& shp_nam) {
     return create(shp_nam.first, shp_nam.second);
   }
 
-  static judgment get_or_create(shape shp, const ForwardRenaming& r) {
-    vector<token> cs(shp.cs);
-    naming nam;
-    for (token &t : shp) {
+  static judgment get_or_create(const std::vector<std::string>& ss, const ForwardRenaming& r) {
+    std::vector<token> tokens;
+    for(const auto& s: ss) {
+      tokens.push_back(Token::get_or_create(s));
+    }
+    return get_or_create(tokens, r);
+  }
+
+  inline static judgment get_or_create(std::vector<token> cs) {
+    return get_or_create(cs, {});
+  }
+
+  inline static judgment get_or_create(const std::vector<std::string>& ss) {
+    return get_or_create(ss, {});
+  }
+
+  static judgment get_or_create(std::vector<token> cs, const ForwardRenaming& r) {
+    mapping map;
+    for (token &t : cs) {
       if(t->var_typ) {
-        nam.push_back(r[t]);
-        t = r[t]->t;
+        map.push_back(r.at(t));
+        t = r.at(t)->tok;
+      } else if(t->mv) {
+        map.push_back(t->mv->i);
+        t = t->mv->typ->tok;
+      } else if(r.find(t) != r.end()) {
+        map.push_back(r.at(t)->i);
+        t = r.at(t)->typ->tok;
       }
     }
-    return get_or_create(std_make_pair(Shape::get_or_create(cs), nam));
+    shape shp = Shape::get_or_create(cs);
+    naming nam = Naming::get_or_create(map);
+    return get_or_create(std::make_pair(shp, nam));
   }

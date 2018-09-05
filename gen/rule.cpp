@@ -5,6 +5,7 @@
 std::vector<Rule> RuleIndex::all_Rules{{}};
 const Rule *rule::operator->() const { return RuleIndex::all_Rules.data() + i; }
 const Rule &rule::operator*() const { return RuleIndex::all_Rules[i]; }
+rule rule::null = 0;
 
 RuleIndex::lookup_by_signature_index_type RuleIndex::lookup_by_signature_index;
 
@@ -68,16 +69,15 @@ rule RuleIndex::index(const rule r) {
   return r;
 }
 
-/*
-std::ostream& operator<<(std::ostream& os, const Rule& r) {
+std::ostream &operator<<(std::ostream &os, const Rule &r) {
   os << "Rule{";
-  os <<  r.arity;os <<  ", " <<  r.conclusion;os <<  ", " <<  r.conditions;os <<
-", " <<  r.label;return os << "}";
+  os << r.arity;
+  os << ", " << r.conclusion;
+  os << ", " << r.conditions;
+  os << ", " << r.label;
+  return os << "}";
 }
-*/
 
-/*
-std::ostream& operator<<(std::ostream& os, const rule& r) {
-  return os << r.i;
+std::ostream &operator<<(std::ostream &os, const rule &r) {
+  return os << *(r) << "@" << r.i;
 }
-*/

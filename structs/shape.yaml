@@ -1,0 +1,25 @@
+name: Shape
+includes:
+  - token.h
+  - type.h
+  - vector
+usings:
+members:
+  shp: std::vector<token>
+unique_index: lookup_by_shp
+properties:
+  typ:
+    type: type
+    body: "{ return TypeIndex::lookup_by_tok(shp[0]); }"
+lookups:
+  lookup_by_typ:
+    type: type
+    getter: typ()
+  lookup_by_tok:
+    type: token
+    getter: shp
+    iterable: true
+  lookup_by_shp:
+    type: std::vector<token>
+    getter: shp
+    unique: true

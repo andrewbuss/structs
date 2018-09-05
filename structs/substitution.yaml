@@ -1,0 +1,55 @@
+name: Substitution
+includes:
+  - token.h
+  - shape.h
+  - vector
+  - judgment.h
+usings:
+  substitutions: std::vector<substitution>
+  judgment_substitutions: std::pair<judgment,  std::vector<substitution>>
+members:
+  jud: judgment
+  args: substitutions
+unique_index: lookup_by_jud_args
+properties:
+  jud_args:
+    type: judgment_substitutions
+    body: "{ return std::make_pair(jud, args); }"
+  as_judgment:
+    type: judgment
+    body: >-
+      {
+        std::vector<token> cs;
+        cs.push_back(jud->shp->typ()->tok);
+
+        mapping map;
+        /*for(auto& s : judgment->shp) {
+          if(s->typ) {
+            uint8_t i = nam[x++];
+            s = s->typ->mvs[i]->tok;
+          }
+        }*/
+        shape shp = Shape::get_or_create(cs);
+        naming nam = Naming::get_or_create(map);
+        return Judgment::get_or_create(std::make_pair(shp, nam));
+      }
+lookups:
+  lookup_by_jud:
+    type: judgment
+    getter: jud
+  lookup_by_args:
+    type: substitutions
+    getter: args
+    iterable: true
+  lookup_by_jud_args:
+    type: judgment_substitutions
+    getter: jud_args()
+    unique: true
+extra: >-
+  inline static substitution create(const judgment_substitutions& jud_args) {
+    return create(jud_args.second, jud_args.first);
+  }
+
+  static substitution get_or_create(const judgment jud, const substitutions& args) {
+    return get_or_create(make_pair(jud, args));
+  }

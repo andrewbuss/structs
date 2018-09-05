@@ -11,6 +11,7 @@
 std::vector<{{ name }}> {{ name }}Index::all_{{ name }}s{ {} };
 const {{ name }}* {{ lname }}::operator->() const { return {{ name }}Index::all_{{ name }}s.data() + i; }
 const {{ name }}& {{ lname }}::operator*() const { return {{ name }}Index::all_{{ name }}s[i]; }
+{{ lname }} {{ lname }}::null = 0;
 
 {% for lookup, lookup_spec in (lookups or {}).items() %}
 {%- if lookup_spec.unique %}
@@ -40,14 +41,14 @@ std::unordered_map<{{ lookup_spec.type }}, {{ lname }}> {{ name }}Index::{{ look
 
 {% if unique_index %}
 {{ lname }} {{ name }}::get_or_create(const {{ lookups[unique_index].type }}& x) {
-  auto {{ abbr }} = {{ name }}Index::{{ unique_index }}(x);
-  if (!{{ abbr }}) return create(x);
-  return {{ abbr }};
+  auto {{ abbr }} = {{ name }}Index::{{ unique_index }}_index.find(x);
+  if ({{ abbr }} == {{ name }}Index::{{ unique_index }}_index.end()) return create(x);
+  return {{ abbr }}->second;
 }
 
 {{ lname }} {{ name }}::get_if_exists(const {{ lookups[unique_index].type }}& x) {
   auto {{ abbr }} = {{ name }}Index::{{ unique_index }}(x);
-  if (!{{ abbr }}) return {{ lname }}{0};
+  if (!{{ abbr }}) return {{ lname }}::null;
   return {{ abbr }};
 }
 {%- endif %}
@@ -88,7 +89,6 @@ std::pair<{{ name }}Index::{{ lookup }}_index_iterator,
   return {{ abbr }};
 }
 
-/*
 std::ostream& operator<<(std::ostream& os, const {{ name }}& {{ abbr }}) {
   os << "{{ name }}{";
   {% set comma = joiner(' ", " << ') -%}
@@ -97,10 +97,7 @@ std::ostream& operator<<(std::ostream& os, const {{ name }}& {{ abbr }}) {
   {%- endfor -%}
   return os << "}";
 }
-*/
 
-/*
 std::ostream& operator<<(std::ostream& os, const {{ lname }}& {{ abbr }}) {
-  return os << {{ abbr }}.i;
+  return os << *({{ abbr }}) << "@" << {{ abbr }}.i;
 }
-*/

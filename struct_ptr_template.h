@@ -19,6 +19,7 @@ struct {{ lname }} {
   bool operator==(const {{ lname }}& other) const { return i == other.i; }
   bool operator!=(const {{ lname }}& other) const { return i != other.i; }
   const {{ name }}* operator->() const;
+  static {{ lname }} null;
 };
 
 namespace std {
